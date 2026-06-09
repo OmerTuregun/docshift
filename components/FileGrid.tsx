@@ -19,31 +19,31 @@ const ACCEPT_BY_TYPE: Record<FileType, string> = {
 const CARD_CONFIGS = [
   {
     title: "Excel",
+    subtitle: ".xlsx .xls",
     fileType: "excel" as const,
     icon: <PiMicrosoftExcelLogoFill />,
     bgColor: "#217346",
-    iconColor: "#ffffff",
   },
   {
     title: "Word",
+    subtitle: ".docx .doc",
     fileType: "word" as const,
     icon: <PiMicrosoftWordLogoFill />,
     bgColor: "#2B579A",
-    iconColor: "#ffffff",
   },
   {
     title: "PDF",
+    subtitle: ".pdf",
     fileType: "pdf" as const,
     icon: <AiOutlineFilePdf />,
     bgColor: "#F40F02",
-    iconColor: "#ffffff",
   },
   {
     title: "PowerPoint",
+    subtitle: ".pptx .ppt",
     fileType: "powerpoint" as const,
     icon: <PiMicrosoftPowerpointLogoFill />,
     bgColor: "#D24726",
-    iconColor: "#ffffff",
   },
 ];
 
@@ -55,23 +55,25 @@ interface FileGridProps {
 
 export default function FileGrid({ user, onResult, onToast }: FileGridProps) {
   return (
-    <div
-      data-authenticated={user ? "true" : "false"}
-      className="grid w-full max-w-4xl grid-cols-4 gap-0 md:grid-cols-2 sm:grid-cols-1"
-    >
-      {CARD_CONFIGS.map(({ title, fileType, icon, bgColor, iconColor }) => (
-        <FileCard
-          key={fileType}
-          title={title}
-          fileType={fileType}
-          accept={ACCEPT_BY_TYPE[fileType]}
-          icon={icon}
-          bgColor={bgColor}
-          iconColor={iconColor}
-          onResult={onResult}
-          onToast={onToast}
-        />
-      ))}
+    <div className="mx-auto mb-10 max-w-4xl px-6">
+      <div
+        data-authenticated={user ? "true" : "false"}
+        className="grid grid-cols-4 gap-0 overflow-hidden rounded-2xl border border-gray-200 shadow-sm md:grid-cols-2"
+      >
+        {CARD_CONFIGS.map(({ title, subtitle, fileType, icon, bgColor }) => (
+          <FileCard
+            key={fileType}
+            title={title}
+            subtitle={subtitle}
+            fileType={fileType}
+            accept={ACCEPT_BY_TYPE[fileType]}
+            icon={icon}
+            bgColor={bgColor}
+            onResult={onResult}
+            onToast={onToast}
+          />
+        ))}
+      </div>
     </div>
   );
 }

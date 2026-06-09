@@ -85,50 +85,53 @@ export default function ResultPanel({
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
             transition={{ type: "spring", damping: 28, stiffness: 260 }}
-            className="fixed inset-x-0 bottom-0 z-50 mx-auto max-w-5xl rounded-t-2xl bg-gray-900 p-5 shadow-2xl"
+            className="fixed inset-x-0 bottom-0 z-50 overflow-hidden rounded-t-2xl bg-[#0f172a] shadow-2xl"
           >
-            <button
-              type="button"
-              aria-label="Close"
-              onClick={onClose}
-              className="absolute top-4 right-4 rounded-full p-2 text-white/70 transition-colors hover:bg-white/10 hover:text-white"
-            >
-              <FiX size={18} />
-            </button>
-
-            <div className="mb-4 flex items-center justify-between gap-4 pr-10">
-              <div className="min-w-0">
-                <p className="truncate text-sm font-semibold text-white">
+            <div className="flex items-center justify-between bg-[#1e293b] px-5 py-3.5">
+              <div className="flex min-w-0 items-center gap-2">
+                <p className="truncate text-sm font-medium text-white/90">
                   {data.fileName}
                 </p>
-                <span className="mt-1 inline-block rounded-full bg-white/10 px-2 py-0.5 text-xs font-medium text-white/80">
+                <span className="rounded-md bg-brand-teal px-2 py-0.5 text-xs text-white">
                   {FORMAT_LABELS[data.format]}
                 </span>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1">
                 <button
                   type="button"
                   onClick={handleCopy}
-                  className="inline-flex items-center gap-2 rounded-lg bg-white/10 px-3 py-2 text-sm text-white transition-colors hover:bg-white/20"
+                  className="rounded-lg p-2 text-white/60 transition-colors hover:text-white"
+                  aria-label="Copy"
                 >
                   <FiCopy size={16} />
-                  {isCopying ? "Copied!" : "Copy"}
                 </button>
                 <button
                   type="button"
                   onClick={handleDownload}
-                  className="inline-flex items-center gap-2 rounded-lg bg-white/10 px-3 py-2 text-sm text-white transition-colors hover:bg-white/20"
+                  className="rounded-lg p-2 text-white/60 transition-colors hover:text-white"
+                  aria-label="Download"
                 >
                   <FiDownload size={16} />
-                  Download
+                </button>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="rounded-lg p-2 text-white/60 transition-colors hover:text-white"
+                  aria-label="Close"
+                >
+                  <FiX size={18} />
                 </button>
               </div>
             </div>
 
-            <pre className="max-h-[60vh] overflow-auto rounded-xl bg-black/80 p-4 text-sm text-green-400">
+            <pre className="max-h-[55vh] overflow-auto bg-[#0f172a] p-5 font-mono text-sm text-emerald-400 [scrollbar-color:rgba(255,255,255,0.2)_transparent] [scrollbar-width:thin]">
               <code>{data.result}</code>
             </pre>
+
+            {isCopying ? (
+              <p className="sr-only">Copied to clipboard</p>
+            ) : null}
           </motion.section>
         </>
       ) : null}

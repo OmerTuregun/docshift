@@ -19,8 +19,8 @@ export default function OutputFormatSelector({
   onChange,
 }: OutputFormatSelectorProps) {
   return (
-    <div className="mb-2 flex w-full justify-center">
-      <div className="inline-flex rounded-full border border-white/20 bg-black/20 p-1">
+    <div className="flex w-full justify-center">
+      <div className="flex gap-1 rounded-xl bg-white/20 p-1">
         {FORMATS.map(({ value: formatValue, label }) => {
           const isActive = value === formatValue;
 
@@ -29,10 +29,10 @@ export default function OutputFormatSelector({
               key={formatValue}
               type="button"
               onClick={() => onChange(formatValue)}
-              className={`rounded-full px-2.5 py-1 text-xs transition-colors ${
+              className={`rounded-lg px-3 py-1.5 text-xs transition-colors ${
                 isActive
-                  ? "bg-white font-bold text-gray-900 shadow"
-                  : "bg-transparent font-medium text-white/70 hover:text-white"
+                  ? "bg-white font-medium text-brand-navy shadow-sm"
+                  : "text-white/60 hover:text-white/90"
               }`}
             >
               {label}

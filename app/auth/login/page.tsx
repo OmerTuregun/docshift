@@ -1,45 +1,53 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
-import GoogleSignInButton from "@/components/GoogleSignInButton";
+import { signIn } from "next-auth/react";
+import { FcGoogle } from "react-icons/fc";
 
 export default function LoginPage() {
   return (
-    <main className="flex min-h-[calc(100vh-3.5rem)] items-center justify-center bg-slate-50 px-4">
-      <div className="w-full max-w-md rounded-2xl border border-gray-200 bg-white p-8 shadow-sm">
-        <div className="mb-8 flex justify-center">
-          <Image
-            src="/logos/docshift_logo_full.svg"
-            alt="DocShift"
-            width={240}
-            height={48}
-            className="h-12 w-auto"
-            priority
-          />
-        </div>
+    <main className="flex min-h-screen items-center justify-center bg-gradient-to-br from-brand-teal-bg/60 via-white to-brand-navy-bg/40 px-4">
+      <div className="w-full max-w-md rounded-2xl border border-gray-100 bg-white p-10 shadow-lg">
+        <Image
+          src="/logos/docshift_logo_full.png"
+          alt="DocShift"
+          width={240}
+          height={72}
+          className="mx-auto mb-6 h-[72px] w-auto"
+          priority
+        />
 
-        <h1 className="mb-2 text-center text-2xl font-bold text-[#1D3461]">
+        <h1 className="text-center text-2xl font-semibold text-brand-navy">
           Hoş geldiniz
         </h1>
-        <p className="mb-8 text-center text-sm text-gray-600">
+        <p className="mt-1 mb-8 text-center text-sm text-gray-400">
           Dönüşüm geçmişinize erişmek için giriş yapın
         </p>
 
-        <GoogleSignInButton />
+        <button
+          type="button"
+          onClick={() => signIn("google", { callbackUrl: "/" })}
+          className="flex w-full items-center justify-center gap-3 rounded-xl border border-gray-200 px-4 py-3 text-sm font-medium text-brand-navy transition hover:border-brand-teal hover:bg-brand-teal-bg"
+        >
+          <FcGoogle size={24} />
+          Google ile devam et
+        </button>
 
-        <div className="my-6 flex items-center gap-3">
-          <div className="h-px flex-1 bg-gray-200" />
-          <span className="text-xs text-gray-400">veya</span>
-          <div className="h-px flex-1 bg-gray-200" />
+        <div className="my-5 flex items-center gap-3">
+          <hr className="flex-1 border-gray-100" />
+          <span className="text-xs text-gray-300">veya</span>
+          <hr className="flex-1 border-gray-100" />
         </div>
 
-        <div className="text-center">
+        <p className="text-center text-sm">
           <Link
             href="/"
-            className="text-sm text-[#1A9BA1] underline underline-offset-2"
+            className="text-brand-teal underline underline-offset-2 hover:text-brand-navy"
           >
             Anonim olarak devam et
           </Link>
-        </div>
+        </p>
       </div>
     </main>
   );

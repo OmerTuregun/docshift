@@ -1,7 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { useSession } from "next-auth/react";
+import { saveAnonConversion } from "@/lib/anonHistory";
 import type { OutputFormat } from "@/lib/converters";
+import { dispatchHistoryUpdated } from "@/lib/historyEvents";
+import { incrementSessionCount } from "@/lib/sessionStats";
 import type { FileType } from "@/types";
 
 interface UploadSuccess {
@@ -11,6 +15,7 @@ interface UploadSuccess {
 }
 
 export function useFileUpload() {
+  const { data: session } = useSession();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<string | null>(null);
@@ -43,6 +48,20 @@ export function useFileUpload() {
       }
 
       setResult(data.converted);
+      incrementSessionCount();
+
+      if (session?.user?.id) {
+        dispatchHistoryUpdated();
+      } else {
+        saveAnonConversion({
+          file_name: file.name,
+          file_type: fileType,
+          output_format: format,
+          converted_result: data.converted,
+          created_at: new Date().toISOString(),
+        });
+        dispatchHistoryUpdated();
+      }
 
       return {
         converted: data.converted,

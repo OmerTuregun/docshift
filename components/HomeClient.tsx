@@ -1,9 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import Link from "next/link";
+import AnonBanner from "@/components/AnonBanner";
 import FileGrid from "@/components/FileGrid";
+import HeroSection from "@/components/HeroSection";
 import ResultPanel, { type ResultPanelData } from "@/components/ResultPanel";
+import StatsRow from "@/components/StatsRow";
 import Toast from "@/components/Toast";
 import type { Session } from "next-auth";
 
@@ -30,22 +32,11 @@ export default function HomeClient({ user }: HomeClientProps) {
   }, [toastMessage]);
 
   return (
-    <main className="flex min-h-[calc(100vh-3.5rem)] flex-col items-center justify-center p-8">
-      <h1 className="mb-12 text-4xl font-bold text-[#1D3461]">DocShift</h1>
+    <main className="min-h-screen bg-white">
+      <HeroSection />
       <FileGrid user={user} onResult={setActiveResult} onToast={showToast} />
-
-      {!user ? (
-        <p className="mt-8 text-center text-sm text-gray-600">
-          Geçmişinizi kaydetmek için{" "}
-          <Link
-            href="/auth/login"
-            className="font-medium text-[#1A9BA1] underline underline-offset-2"
-          >
-            Giriş yapın
-          </Link>
-        </p>
-      ) : null}
-
+      <AnonBanner isLoggedIn={Boolean(user)} />
+      <StatsRow />
       <ResultPanel
         data={activeResult}
         onClose={() => setActiveResult(null)}

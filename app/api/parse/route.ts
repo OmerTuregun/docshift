@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
+import { auth } from "@/auth";
 import { convert, isOutputFormat, type OutputFormat } from "@/lib/converters";
+import { saveConversion } from "@/lib/db/history";
 import {
   parseExcel,
   parsePdf,
@@ -71,6 +73,18 @@ export async function POST(request: Request) {
     }
 
     const converted = convert(raw, outputFormat);
+
+    const session = await auth();
+
+    if (session?.user?.id) {
+      await saveConversion({
+        userId: session.user.id,
+        fileName: file.name,
+        fileType,
+        outputFormat,
+        convertedResult: converted,
+      });
+    }
 
     return NextResponse.json({
       success: true,
