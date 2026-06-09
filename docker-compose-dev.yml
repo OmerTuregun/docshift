@@ -1,0 +1,40 @@
+services:
+  docshift-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: docshift
+      POSTGRES_PASSWORD: docshift123
+      POSTGRES_DB: docshift
+    ports:
+      - "5435:5432"
+    volumes:
+      - docshift_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U docshift"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  docshift-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3030:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://docshift:docshift123@docshift-db:5432/docshift
+      NEXTAUTH_SECRET: your-secret-here-change-in-prod
+      NEXTAUTH_URL: http://localhost:3030
+      AUTH_GOOGLE_ID: placeholder_replace_with_real
+      AUTH_GOOGLE_SECRET: placeholder_replace_with_real
+    depends_on:
+      docshift-db:
+        condition: service_healthy
+    command: sh -c "npm install && npm run dev"
+
+volumes:
+  docshift_db_data:
