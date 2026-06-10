@@ -54,10 +54,10 @@ interface FileGridProps {
 
 export default function FileGrid({ user, addFiles }: FileGridProps) {
   return (
-    <div id="file-cards" className="mx-auto mb-8 max-w-4xl scroll-mt-20 px-4 sm:px-6">
+    <div id="file-cards" className="mx-auto mb-8 max-w-6xl scroll-mt-20 px-4 sm:px-6">
       <div
         data-authenticated={user ? "true" : "false"}
-        className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4"
+        className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4 md:gap-5"
       >
         {CARD_CONFIGS.map(({ title, subtitle, fileType, icon, bgColor }) => (
           <FileCard

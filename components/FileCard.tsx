@@ -172,7 +172,7 @@ export default function FileCard({
       }}
     >
       <div
-        className="relative aspect-square w-full overflow-hidden rounded-2xl shadow-md"
+        className="relative aspect-square w-full overflow-hidden rounded-2xl shadow-md md:aspect-[4/5]"
         style={{ perspective: "1000px" }}
       >
         <motion.div
@@ -201,27 +201,30 @@ export default function FileCard({
               <div className="pointer-events-none absolute inset-0 animate-pulse rounded-2xl border-2 border-white/60" />
             ) : null}
 
-            <div className="flex shrink-0 flex-col items-center pt-4 text-center">
-              <div className="text-[28px] text-white [&>svg]:text-white">{icon}</div>
-              <p className="mt-0.5 text-sm text-white/80">{title}</p>
+            <div className="flex shrink-0 flex-col items-center pt-3 text-center">
+              <div className="text-2xl text-white [&>svg]:h-6 [&>svg]:w-6 [&>svg]:text-white">
+                {icon}
+              </div>
+              <p className="mt-1 text-sm text-white/80">{title}</p>
             </div>
 
-            <div className="shrink-0 px-2.5 pt-2">
+            <div className="shrink-0 px-3 pt-2">
               <OutputFormatSelector
                 value={outputFormat}
                 onChange={setOutputFormat}
               />
             </div>
 
-            <div className="relative mx-3 mt-2 mb-3 flex min-h-[90px] flex-1 flex-col">
+            <div className="flex flex-1 flex-col px-3 pt-2 pb-3">
               <button
                 type="button"
                 onClick={handleDropzoneClick}
                 onDrop={handleDrop}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
-                className="flex h-full min-h-[90px] w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-white/40 px-2 py-3 text-center text-xs leading-snug text-white/60 transition hover:border-white/80 hover:bg-white/10"
+                className="flex min-h-[88px] flex-1 cursor-pointer flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed border-white/40 px-3 py-3 text-center text-xs leading-snug text-white/60 transition hover:border-white/80 hover:bg-white/10"
               >
+                <TbUpload className="text-base text-white/50" />
                 <span>
                   Dosyayı buraya sürükle
                   <br />
