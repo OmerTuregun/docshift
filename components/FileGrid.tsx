@@ -1,5 +1,5 @@
 import FileCard from "@/components/FileCard";
-import type { ResultPanelData } from "@/components/ResultPanel";
+import type { OutputFormat } from "@/lib/converters";
 import type { FileType } from "@/types";
 import type { Session } from "next-auth";
 import { AiOutlineFilePdf } from "react-icons/ai";
@@ -49,16 +49,15 @@ const CARD_CONFIGS = [
 
 interface FileGridProps {
   user: Session["user"] | null;
-  onResult: (result: ResultPanelData) => void;
-  onToast: (message: string) => void;
+  addFiles: (files: File[], fileType: FileType, format: OutputFormat) => void;
 }
 
-export default function FileGrid({ user, onResult, onToast }: FileGridProps) {
+export default function FileGrid({ user, addFiles }: FileGridProps) {
   return (
-    <div className="mx-auto mb-10 max-w-4xl px-6">
+    <div className="mx-auto mb-10 w-full max-w-5xl px-4 sm:px-6">
       <div
         data-authenticated={user ? "true" : "false"}
-        className="grid grid-cols-4 gap-0 overflow-hidden rounded-2xl border border-gray-200 shadow-sm md:grid-cols-2"
+        className="grid grid-cols-2 gap-4 md:grid-cols-4"
       >
         {CARD_CONFIGS.map(({ title, subtitle, fileType, icon, bgColor }) => (
           <FileCard
@@ -69,8 +68,7 @@ export default function FileGrid({ user, onResult, onToast }: FileGridProps) {
             accept={ACCEPT_BY_TYPE[fileType]}
             icon={icon}
             bgColor={bgColor}
-            onResult={onResult}
-            onToast={onToast}
+            addFiles={addFiles}
           />
         ))}
       </div>

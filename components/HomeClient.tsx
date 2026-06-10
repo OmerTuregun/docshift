@@ -1,20 +1,18 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
 import AnonBanner from "@/components/AnonBanner";
+import ConversionCounter from "@/components/ConversionCounter";
 import FileGrid from "@/components/FileGrid";
 import HeroSection from "@/components/HeroSection";
-import ResultPanel, { type ResultPanelData } from "@/components/ResultPanel";
-import StatsRow from "@/components/StatsRow";
+import JobResultList from "@/components/JobResultList";
 import Toast from "@/components/Toast";
-import type { Session } from "next-auth";
+import { useFileUpload } from "@/hooks/useFileUpload";
 
-interface HomeClientProps {
-  user: Session["user"] | null;
-}
-
-export default function HomeClient({ user }: HomeClientProps) {
-  const [activeResult, setActiveResult] = useState<ResultPanelData | null>(null);
+export default function HomeClient() {
+  const { data: session } = useSession();
+  const { jobs, addFiles, clearJobs } = useFileUpload();
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const showToast = useCallback((message: string) => {
@@ -32,17 +30,15 @@ export default function HomeClient({ user }: HomeClientProps) {
   }, [toastMessage]);
 
   return (
-    <main className="min-h-screen bg-white">
-      <HeroSection />
-      <FileGrid user={user} onResult={setActiveResult} onToast={showToast} />
-      <AnonBanner isLoggedIn={Boolean(user)} />
-      <StatsRow />
-      <ResultPanel
-        data={activeResult}
-        onClose={() => setActiveResult(null)}
-        onToast={showToast}
-      />
-      <Toast message={toastMessage} />
-    </main>
+    <div className="min-h-screen bg-white px-4 sm:px-0">
+      <main className="w-full">
+        <HeroSection />
+        <FileGrid user={session?.user ?? null} addFiles={addFiles} />
+        <AnonBanner isLoggedIn={Boolean(session?.user)} />
+        <ConversionCounter />
+        <JobResultList jobs={jobs} clearJobs={clearJobs} onToast={showToast} />
+        <Toast message={toastMessage} />
+      </main>
+    </div>
   );
 }

@@ -16,6 +16,10 @@ jest.mock("@/lib/db/history", () => ({
   saveConversion: jest.fn(async () => undefined),
 }));
 
+jest.mock("@/lib/db/stats", () => ({
+  incrementConversionCount: jest.fn(async () => undefined),
+}));
+
 jest.mock("@/lib/parsers", () => ({
   parseExcel: jest.fn(),
   parseWord: jest.fn(),

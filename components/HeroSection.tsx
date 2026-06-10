@@ -9,7 +9,7 @@ export default function HeroSection() {
   const [activePill, setActivePill] = useState<string>("JSON");
 
   return (
-    <section className="w-full bg-gradient-to-b from-brand-teal-bg/40 to-white pt-16 pb-10 text-center">
+    <section className="w-full bg-gradient-to-b from-brand-teal-bg/40 to-white pt-16 pb-6 text-center sm:pb-10">
       <div className="mx-auto max-w-3xl px-6">
         <span className="mb-5 inline-flex items-center gap-2 rounded-full bg-brand-teal-bg px-3 py-1.5 text-xs font-medium text-brand-navy">
           <TbSparkles size={14} />

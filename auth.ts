@@ -1,11 +1,27 @@
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 import PostgresAdapter from "@auth/pg-adapter";
+import { isGoogleAuthConfigured } from "@/lib/auth-config";
 import { pool } from "@/lib/db/pool";
+
+const googleClientId = process.env.AUTH_GOOGLE_ID;
+const googleClientSecret = process.env.AUTH_GOOGLE_SECRET;
+
+if (!isGoogleAuthConfigured()) {
+  console.warn(
+    "[auth] Google OAuth yapılandırılmadı. .env.local dosyasına AUTH_GOOGLE_ID, AUTH_GOOGLE_SECRET ve AUTH_SECRET ekleyin.",
+  );
+}
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PostgresAdapter(pool),
-  providers: [Google],
+  secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
+  providers: [
+    Google({
+      clientId: googleClientId ?? "",
+      clientSecret: googleClientSecret ?? "",
+    }),
+  ],
   trustHost: true,
   pages: {
     signIn: "/auth/login",

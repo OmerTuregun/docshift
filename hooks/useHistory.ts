@@ -111,10 +111,12 @@ export function useHistory(isOpen: boolean) {
     if (status !== "authenticated" || mergedRef.current) return;
 
     mergedRef.current = true;
-    void mergeOnLogin().then(() => fetchHistory());
-  }, [fetchHistory, mergeOnLogin, status]);
+    void mergeOnLogin();
+  }, [mergeOnLogin, status]);
 
   useEffect(() => {
+    if (!isOpen) return;
+
     const handleHistoryUpdated = () => {
       void fetchHistory();
     };
@@ -122,7 +124,7 @@ export function useHistory(isOpen: boolean) {
     window.addEventListener(HISTORY_UPDATED_EVENT, handleHistoryUpdated);
     return () =>
       window.removeEventListener(HISTORY_UPDATED_EVENT, handleHistoryUpdated);
-  }, [fetchHistory]);
+  }, [fetchHistory, isOpen]);
 
   return {
     history,

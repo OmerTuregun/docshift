@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { convert, isOutputFormat, type OutputFormat } from "@/lib/converters";
 import { saveConversion } from "@/lib/db/history";
+import { incrementConversionCount } from "@/lib/db/stats";
 import {
   parseExcel,
   parsePdf,
@@ -85,6 +86,8 @@ export async function POST(request: Request) {
         convertedResult: converted,
       });
     }
+
+    await incrementConversionCount();
 
     return NextResponse.json({
       success: true,

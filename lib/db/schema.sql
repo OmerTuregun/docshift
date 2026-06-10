@@ -37,6 +37,15 @@ CREATE TABLE IF NOT EXISTS verification_token (
   PRIMARY KEY (identifier, token)
 );
 
+CREATE TABLE IF NOT EXISTS global_stats (
+  key TEXT PRIMARY KEY,
+  value BIGINT DEFAULT 0
+);
+
+INSERT INTO global_stats (key, value)
+VALUES ('total_conversions', 0)
+ON CONFLICT (key) DO NOTHING;
+
 -- DocShift custom table
 CREATE TABLE IF NOT EXISTS conversion_history (
   id SERIAL PRIMARY KEY,

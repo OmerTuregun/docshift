@@ -24,13 +24,12 @@ services:
     volumes:
       - .:/app
       - /app/node_modules
+    env_file:
+      - .env.local
     environment:
       NODE_ENV: development
       DATABASE_URL: postgresql://docshift:docshift123@docshift-db:5432/docshift
-      NEXTAUTH_SECRET: your-secret-here-change-in-prod
       NEXTAUTH_URL: http://localhost:3030
-      AUTH_GOOGLE_ID: placeholder_replace_with_real
-      AUTH_GOOGLE_SECRET: placeholder_replace_with_real
     depends_on:
       docshift-db:
         condition: service_healthy

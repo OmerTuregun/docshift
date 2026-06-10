@@ -1,11 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
-import { auth } from "@/auth";
 import NavBarClient from "@/components/NavBarClient";
+import type { Session } from "next-auth";
 
-export default async function NavBar() {
-  const session = await auth();
+interface NavBarProps {
+  session: Session | null;
+}
 
+export default function NavBar({ session }: NavBarProps) {
   return (
     <header className="sticky top-0 z-50 border-b border-gray-100 bg-white/95 backdrop-blur-sm">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
@@ -15,7 +17,8 @@ export default async function NavBar() {
             alt="DocShift"
             width={160}
             height={32}
-            className="hidden h-8 w-auto md:block"
+            className="hidden md:block"
+            style={{ height: "2rem", width: "auto" }}
             priority
           />
           <Image
@@ -23,7 +26,8 @@ export default async function NavBar() {
             alt="DocShift"
             width={32}
             height={32}
-            className="h-8 w-8 md:hidden"
+            className="md:hidden"
+            style={{ height: "2rem", width: "2rem" }}
             priority
           />
         </Link>

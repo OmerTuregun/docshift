@@ -1,8 +1,11 @@
-import { auth } from "@/auth";
 import HomeClient from "@/components/HomeClient";
 
-export default async function Home() {
-  const session = await auth();
-
-  return <HomeClient user={session?.user ?? null} />;
+export default function Home() {
+  return (
+    <div className="min-h-screen bg-white">
+      <div className="w-full">
+        <HomeClient />
+      </div>
+    </div>
+  );
 }

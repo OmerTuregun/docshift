@@ -1,12 +1,16 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { signOut } from "next-auth/react";
 import { TbHistory } from "react-icons/tb";
 import type { Session } from "next-auth";
-import HistoryPanel from "@/components/HistoryPanel";
+
+const HistoryPanel = dynamic(() => import("@/components/HistoryPanel"), {
+  ssr: false,
+});
 
 interface NavBarClientProps {
   user: Session["user"] | null;
@@ -122,10 +126,12 @@ export default function NavBarClient({ user }: NavBarClientProps) {
         )}
       </div>
 
-      <HistoryPanel
-        isOpen={historyPanelOpen}
-        onClose={() => setHistoryPanelOpen(false)}
-      />
+      {historyPanelOpen ? (
+        <HistoryPanel
+          isOpen={historyPanelOpen}
+          onClose={() => setHistoryPanelOpen(false)}
+        />
+      ) : null}
     </>
   );
 }
