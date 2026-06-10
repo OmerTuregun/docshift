@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: "💡 Geliştirme önerisi"
+    url: https://github.com/OmerTuregun/docshift/discussions
+    about: "Büyük öneriler için Discussion aç"

@@ -1,0 +1,24 @@
+name: "🐛 Bug Report"
+description: "Hata bildirimi"
+labels: ["bug"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: "Hata açıklaması"
+      placeholder: "Ne oldu? Ne olması gerekiyordu?"
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: "Adımlar"
+      placeholder: |
+        1. ... sayfasına git
+        2. ... butonuna tıkla
+        3. Hata oluştu
+  - type: input
+    id: environment
+    attributes:
+      label: "Ortam"
+      placeholder: "dev / prod, tarayıcı, OS"

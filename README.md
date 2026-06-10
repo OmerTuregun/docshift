@@ -1,36 +1,64 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# DocShift — Document to Data Conversion
 
-## Getting Started
+> Excel, Word, PDF ve PowerPoint dosyalarını JSON, XML,
+> Markdown veya düz metne dönüştüren web uygulaması.
 
-First, run the development server:
+## Özellikler
+
+- 4 dosya formatı desteği: Excel, Word, PDF, PowerPoint
+- 4 çıktı formatı: JSON, XML, Markdown, Plain Text
+- Çoklu dosya yükleme
+- Dönüşüm geçmişi (üye/anonim)
+- Google OAuth ile giriş
+- Docker ile çalıştırma (dev/prod)
+
+## Kurulum
+
+### Gereksinimler
+
+- Node.js 20+
+- Docker + Docker Compose
+
+### Dev ortamı
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cp .env.example .env.local
+# .env.local dosyasını doldur
+docker compose -f docker-compose-dev.yml up --build
+# http://localhost:3030
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Prod ortamı
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+cp .env.example .env.production
+# .env.production dosyasını doldur
+docker compose --env-file .env.production -f docker-compose.prod.yml up --build -d
+# http://localhost:3031
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Env Variables
 
-## Learn More
+| Değişken | Açıklama |
+|---|---|
+| `DATABASE_URL` | PostgreSQL bağlantı string |
+| `NEXTAUTH_SECRET` | Random secret (`openssl rand -base64 32`) |
+| `AUTH_SECRET` | NextAuth secret (alternatif; `NEXTAUTH_SECRET` ile aynı değer) |
+| `NEXTAUTH_URL` | Uygulama URL'i |
+| `AUTH_GOOGLE_ID` | Google OAuth Client ID |
+| `AUTH_GOOGLE_SECRET` | Google OAuth Client Secret |
 
-To learn more about Next.js, take a look at the following resources:
+## Tech Stack
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Next.js 16 (App Router) + TypeScript
+- Tailwind CSS + Framer Motion
+- NextAuth.js v5
+- PostgreSQL + pg
+- Docker Compose
+- Jest
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Geliştirme Süreci
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Her yeni özellik için GitHub Issue açılır,
+issue'daki Cursor prompt'u IDE'ye uygulanır,
+commit mesajı issue numarasını içerir: `feat: #1 chained conversion`

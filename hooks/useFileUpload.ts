@@ -88,5 +88,76 @@ export function useFileUpload() {
     setJobs([]);
   }, []);
 
-  return { jobs, addFiles, clearJobs };
+  const chainConvert = useCallback(
+    async (job: UploadJob, toFormat: OutputFormat) => {
+      if (job.status !== "success" || !job.result) {
+        return;
+      }
+
+      if (toFormat === job.outputFormat) {
+        return;
+      }
+
+      const chainedJob: UploadJob = {
+        id: crypto.randomUUID(),
+        file: job.file,
+        fileType: job.fileType,
+        outputFormat: toFormat,
+        status: "loading",
+        isChained: true,
+        chainedFrom: job.outputFormat,
+      };
+
+      setJobs((prev) => [...prev, chainedJob]);
+
+      try {
+        const response = await fetch("/api/convert-chain", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            content: job.result,
+            fromFormat: job.outputFormat,
+            toFormat,
+            fileName: job.file.name,
+            fileType: job.fileType,
+          }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          throw new Error(data.error ?? "Chain conversion failed");
+        }
+
+        updateJob(chainedJob.id, {
+          status: "success",
+          result: data.converted,
+        });
+        window.dispatchEvent(new CustomEvent("stats:updated"));
+        incrementSessionCount();
+
+        if (!isAuthenticated) {
+          saveAnonConversion({
+            file_name: `${job.file.name} (${job.outputFormat}→${toFormat})`,
+            file_type: job.fileType,
+            output_format: toFormat,
+            converted_result: data.converted,
+            created_at: new Date().toISOString(),
+          });
+        }
+
+        dispatchHistoryUpdated();
+      } catch (chainError) {
+        const message =
+          chainError instanceof Error
+            ? chainError.message
+            : "Chain conversion failed";
+
+        updateJob(chainedJob.id, { status: "error", error: message });
+      }
+    },
+    [isAuthenticated, updateJob],
+  );
+
+  return { jobs, addFiles, clearJobs, chainConvert };
 }

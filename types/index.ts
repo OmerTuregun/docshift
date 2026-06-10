@@ -15,4 +15,14 @@ export interface UploadJob {
   status: "idle" | "loading" | "success" | "error";
   result?: string;
   error?: string;
+  chainedFrom?: OutputFormat;
+  isChained?: boolean;
 }
+
+export type ChainedInput = {
+  id: string;
+  content: string;
+  sourceFormat: OutputFormat;
+  fileName: string;
+  fileType: FileType;
+};

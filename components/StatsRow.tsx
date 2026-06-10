@@ -28,7 +28,7 @@ function StatCard({ icon, value, label, sub }: StatCardProps) {
 
 export default function StatsRow() {
   const [totalConversions, setTotalConversions] = useState<number | null>(null);
-  const [sessionCount, setSessionCount] = useState(() => getSessionCount());
+  const [sessionCount, setSessionCount] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -54,13 +54,15 @@ export default function StatsRow() {
   }, []);
 
   useEffect(() => {
-    const handleConversionDone = () => {
+    const syncSessionCount = () => {
       setSessionCount(getSessionCount());
     };
 
-    window.addEventListener(CONVERSION_DONE_EVENT, handleConversionDone);
+    syncSessionCount();
+
+    window.addEventListener(CONVERSION_DONE_EVENT, syncSessionCount);
     return () =>
-      window.removeEventListener(CONVERSION_DONE_EVENT, handleConversionDone);
+      window.removeEventListener(CONVERSION_DONE_EVENT, syncSessionCount);
   }, []);
 
   return (
@@ -88,7 +90,13 @@ export default function StatsRow() {
 
         <StatCard
           icon={<TbRefresh className="text-base text-[#1A9BA1]" />}
-          value={sessionCount.toLocaleString("tr-TR")}
+          value={
+            sessionCount === null ? (
+              <div className="h-7 w-10 animate-pulse rounded bg-gray-100" />
+            ) : (
+              sessionCount.toLocaleString("tr-TR")
+            )
+          }
           label="Bu oturumda"
           sub="dönüşüm yaptınız"
         />

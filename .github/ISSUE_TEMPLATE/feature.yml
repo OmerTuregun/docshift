@@ -1,0 +1,36 @@
+name: "✨ Feature / Prompt"
+description: "Yeni özellik veya Cursor prompt"
+labels: ["prompt", "feature"]
+body:
+  - type: input
+    id: title
+    attributes:
+      label: "Özellik adı"
+      placeholder: "Chained conversion"
+    validations:
+      required: true
+  - type: textarea
+    id: cursor-prompt
+    attributes:
+      label: "Cursor Prompt"
+      description: "Cursor IDE'ye yapıştırılacak prompt"
+      render: markdown
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: "Tamamlanma kriterleri"
+      placeholder: |
+        - [ ] Kullanıcı JSON çıktısını XML'e dönüştürebilir
+        - [ ] Test yazıldı
+    validations:
+      required: true
+  - type: dropdown
+    id: priority
+    attributes:
+      label: "Öncelik"
+      options:
+        - "🔴 Yüksek"
+        - "🟡 Orta"
+        - "🟢 Düşük"

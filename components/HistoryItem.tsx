@@ -1,6 +1,6 @@
 "use client";
 
-import { TbDownload, TbTrash } from "react-icons/tb";
+import { TbDownload, TbLink, TbTrash } from "react-icons/tb";
 import type { ConversionRecord } from "@/lib/db/history";
 import { downloadConvertedFile } from "@/lib/downloadConverted";
 import { formatRelativeTime } from "@/lib/formatRelativeTime";
@@ -35,6 +35,7 @@ export default function HistoryItem({ record, onDelete }: HistoryItemProps) {
   const dotColor = FILE_TYPE_COLORS[record.file_type] ?? "#1A9BA1"; // file-type accent
   const badgeClass =
     FORMAT_BADGE_CLASSES[record.output_format] ?? "bg-slate-100 text-slate-700";
+  const isChained = record.file_name.includes("→");
 
   return (
     <div className="flex items-start gap-3 rounded-lg px-3 py-3 transition-colors hover:bg-slate-50">
@@ -44,7 +45,17 @@ export default function HistoryItem({ record, onDelete }: HistoryItemProps) {
       />
 
       <div className="min-w-0 flex-1">
-        <p className="max-w-[180px] truncate text-sm font-medium text-gray-900">
+        <p
+          className={`flex max-w-[180px] items-center truncate text-sm font-medium ${
+            isChained ? "text-gray-600 italic" : "text-gray-900"
+          }`}
+        >
+          {isChained ? (
+            <TbLink
+              className="mr-1 shrink-0 text-xs text-[#4BBFC4]"
+              aria-hidden="true"
+            />
+          ) : null}
           {record.file_name}
         </p>
         <p className="mt-1 text-xs text-gray-500">

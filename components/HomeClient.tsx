@@ -18,7 +18,7 @@ import { useFileUpload } from "@/hooks/useFileUpload";
 
 export default function HomeClient() {
   const { data: session } = useSession();
-  const { jobs, addFiles, clearJobs } = useFileUpload();
+  const { jobs, addFiles, clearJobs, chainConvert } = useFileUpload();
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const showToast = useCallback((message: string) => {
@@ -41,7 +41,12 @@ export default function HomeClient() {
         <HeroSection />
         <StatsRow />
         <FileGrid user={session?.user ?? null} addFiles={addFiles} />
-        <JobResultList jobs={jobs} clearJobs={clearJobs} onToast={showToast} />
+        <JobResultList
+          jobs={jobs}
+          clearJobs={clearJobs}
+          onToast={showToast}
+          chainConvert={chainConvert}
+        />
         <AnonBanner />
         <SectionDivider />
         <HowItWorks />
