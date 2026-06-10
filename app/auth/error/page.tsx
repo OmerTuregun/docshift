@@ -54,6 +54,11 @@ export default async function AuthErrorPage({
                   http://localhost:3030/api/auth/callback/google
                 </code>
               </li>
+              <li>
+                Veritabanı tabloları yoksa migration çalıştırın:{" "}
+                <code className="text-brand-navy">GET /api/migrate</code> veya{" "}
+                <code className="text-brand-navy">node scripts/migrate.mjs</code>
+              </li>
               <li>Docker kullanıyorsanız container&apos;ı yeniden başlatın</li>
             </ol>
           </div>

@@ -1,3 +1,4 @@
+import { randomUUID } from "crypto";
 import { pool } from "@/lib/db/pool";
 
 export interface ConversionRecord {
@@ -39,9 +40,9 @@ export async function saveConversion({
 }: SaveConversionInput): Promise<void> {
   await pool.query(
     `INSERT INTO conversion_history
-      (user_id, file_name, file_type, output_format, converted_result)
-     VALUES ($1, $2, $3, $4, $5)`,
-    [userId, fileName, fileType, outputFormat, convertedResult],
+      (id, user_id, file_name, file_type, output_format, converted_result)
+     VALUES ($1, $2, $3, $4, $5, $6)`,
+    [randomUUID(), userId, fileName, fileType, outputFormat, convertedResult],
   );
 }
 
@@ -75,6 +76,7 @@ export async function deleteHistoryItem(
 export async function bulkInsertHistory(
   userId: string,
   records: Array<{
+    id: string;
     file_name: string;
     file_type: string;
     output_format: string;
@@ -85,11 +87,13 @@ export async function bulkInsertHistory(
   let merged = 0;
 
   for (const record of records.slice(0, 5)) {
-    await pool.query(
+    const result = await pool.query(
       `INSERT INTO conversion_history
-        (user_id, file_name, file_type, output_format, converted_result, created_at)
-       VALUES ($1, $2, $3, $4, $5, COALESCE($6, NOW()))`,
+        (id, user_id, file_name, file_type, output_format, converted_result, created_at)
+       VALUES ($1, $2, $3, $4, $5, $6, COALESCE($7, NOW()))
+       ON CONFLICT (id) DO NOTHING`,
       [
+        record.id,
         userId,
         record.file_name,
         record.file_type,
@@ -98,7 +102,10 @@ export async function bulkInsertHistory(
         record.created_at ?? null,
       ],
     );
-    merged += 1;
+
+    if ((result.rowCount ?? 0) > 0) {
+      merged += 1;
+    }
   }
 
   return merged;

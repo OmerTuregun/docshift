@@ -1,29 +1,40 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import {
-  clearAnonHistory,
   deleteAnonHistoryItem,
   getAnonHistory,
+  type AnonRecord,
 } from "@/lib/anonHistory";
 import type { ConversionRecord } from "@/lib/db/history";
 import { HISTORY_UPDATED_EVENT } from "@/lib/historyEvents";
 
+function toConversionRecord(record: AnonRecord): ConversionRecord {
+  return {
+    ...record,
+    user_id: "anon",
+  };
+}
+
 export function useHistory(isOpen: boolean) {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
+  const isAuthenticated = status === "authenticated";
   const [history, setHistory] = useState<ConversionRecord[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const mergedRef = useRef(false);
+
+  const loadAnonHistory = useCallback(() => {
+    setHistory(getAnonHistory().map(toConversionRecord));
+  }, []);
 
   const fetchHistory = useCallback(async () => {
     setIsLoading(true);
     setError(null);
 
     try {
-      if (!session?.user?.id) {
-        setHistory(getAnonHistory());
+      if (!isAuthenticated) {
+        loadAnonHistory();
         return;
       }
 
@@ -44,37 +55,7 @@ export function useHistory(isOpen: boolean) {
     } finally {
       setIsLoading(false);
     }
-  }, [session?.user?.id]);
-
-  const mergeOnLogin = useCallback(async () => {
-    const anonRecords = getAnonHistory();
-
-    if (!session?.user?.id || anonRecords.length === 0) {
-      return;
-    }
-
-    try {
-      await fetch("/api/history/merge", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          records: anonRecords.map(
-            ({ file_name, file_type, output_format, converted_result, created_at }) => ({
-              file_name,
-              file_type,
-              output_format,
-              converted_result,
-              created_at,
-            }),
-          ),
-        }),
-      });
-
-      clearAnonHistory();
-    } catch {
-      // Keep local records if merge fails; user can retry on next login.
-    }
-  }, [session?.user?.id]);
+  }, [isAuthenticated, loadAnonHistory]);
 
   const deleteItem = useCallback(
     async (id: string) => {
@@ -82,7 +63,7 @@ export function useHistory(isOpen: boolean) {
       setHistory((items) => items.filter((item) => item.id !== id));
 
       try {
-        if (!session?.user?.id) {
+        if (!isAuthenticated) {
           deleteAnonHistoryItem(id);
           return;
         }
@@ -99,7 +80,7 @@ export function useHistory(isOpen: boolean) {
         await fetchHistory();
       }
     },
-    [fetchHistory, history, session?.user?.id],
+    [fetchHistory, history, isAuthenticated],
   );
 
   useEffect(() => {
@@ -108,23 +89,18 @@ export function useHistory(isOpen: boolean) {
   }, [fetchHistory, isOpen, status]);
 
   useEffect(() => {
-    if (status !== "authenticated" || mergedRef.current) return;
-
-    mergedRef.current = true;
-    void mergeOnLogin();
-  }, [mergeOnLogin, status]);
-
-  useEffect(() => {
-    if (!isOpen) return;
-
     const handleHistoryUpdated = () => {
-      void fetchHistory();
+      if (isAuthenticated) {
+        void fetchHistory();
+      } else {
+        loadAnonHistory();
+      }
     };
 
     window.addEventListener(HISTORY_UPDATED_EVENT, handleHistoryUpdated);
     return () =>
       window.removeEventListener(HISTORY_UPDATED_EVENT, handleHistoryUpdated);
-  }, [fetchHistory, isOpen]);
+  }, [fetchHistory, isAuthenticated, loadAnonHistory]);
 
   return {
     history,

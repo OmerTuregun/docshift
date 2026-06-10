@@ -16,6 +16,7 @@ if (!isGoogleAuthConfigured()) {
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PostgresAdapter(pool),
   secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
+  session: { strategy: "database" },
   providers: [
     Google({
       clientId: googleClientId ?? "",

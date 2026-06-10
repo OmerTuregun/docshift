@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState } from "react";
 import { TbSparkles } from "react-icons/tb";
 
@@ -11,6 +12,17 @@ export default function HeroSection() {
   return (
     <section className="w-full bg-gradient-to-b from-brand-teal-bg/40 to-white pt-16 pb-6 text-center sm:pb-10">
       <div className="mx-auto max-w-3xl px-6">
+        <div className="mb-6 flex justify-center">
+          <Image
+            src="/logos/docshift_logo_full.png"
+            alt="DocShift"
+            width={280}
+            height={84}
+            className="h-auto w-auto max-h-16 sm:max-h-20"
+            priority
+          />
+        </div>
+
         <span className="mb-5 inline-flex items-center gap-2 rounded-full bg-brand-teal-bg px-3 py-1.5 text-xs font-medium text-brand-navy">
           <TbSparkles size={14} />
           Dosyalarını saniyeler içinde dönüştür

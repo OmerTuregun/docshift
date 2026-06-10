@@ -48,7 +48,7 @@ ON CONFLICT (key) DO NOTHING;
 
 -- DocShift custom table
 CREATE TABLE IF NOT EXISTS conversion_history (
-  id SERIAL PRIMARY KEY,
+  id TEXT PRIMARY KEY,
   user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   file_name TEXT NOT NULL,
   file_type TEXT NOT NULL,

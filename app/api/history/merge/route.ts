@@ -4,12 +4,13 @@ import { bulkInsertHistory } from "@/lib/db/history";
 
 export const runtime = "nodejs";
 
-interface MergeRecord {
+interface AnonRecord {
+  id: string;
   file_name: string;
   file_type: string;
   output_format: string;
   converted_result: string;
-  created_at?: string;
+  created_at: string;
 }
 
 export async function POST(request: Request) {
@@ -23,7 +24,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const body = (await request.json()) as { records?: MergeRecord[] };
+    const body = (await request.json()) as { records?: AnonRecord[] };
     const records = Array.isArray(body.records) ? body.records : [];
     const merged = await bulkInsertHistory(session.user.id, records);
 

@@ -25,8 +25,10 @@ export default function OutputFormatSelector({
   return (
     <div className="flex w-full justify-center">
       <div
-        className={`flex gap-1 rounded-xl p-1 ${
-          isInline ? "border border-gray-200 bg-gray-50" : "bg-white/20"
+        className={`w-full rounded-xl p-1 ${
+          isInline
+            ? "flex gap-1 border border-gray-200 bg-gray-50"
+            : "grid grid-cols-2 gap-1 bg-white/20"
         }`}
       >
         {FORMATS.map(({ value: formatValue, label }) => {
@@ -40,7 +42,9 @@ export default function OutputFormatSelector({
                 event.stopPropagation();
                 onChange(formatValue);
               }}
-              className={`rounded-lg px-3 py-1.5 text-xs transition-colors ${
+              className={`rounded-lg transition-colors ${
+                isInline ? "px-3 py-1.5 text-xs" : "px-1.5 py-1.5 text-[11px]"
+              } ${
                 isActive
                   ? isInline
                     ? "bg-brand-teal font-medium text-white shadow-sm"

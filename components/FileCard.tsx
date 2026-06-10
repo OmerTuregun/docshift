@@ -8,6 +8,13 @@ import { useIsMobile } from "@/hooks/useIsMobile";
 import type { OutputFormat } from "@/lib/converters";
 import type { FileType } from "@/types";
 
+const FORMAT_OPTIONS: { value: OutputFormat; label: string }[] = [
+  { value: "json", label: "JSON" },
+  { value: "xml", label: "XML" },
+  { value: "markdown", label: "Markdown" },
+  { value: "plaintext", label: "Plain Text" },
+];
+
 interface FileCardProps {
   title: string;
   subtitle: string;
@@ -22,40 +29,27 @@ function FrontFace({
   title,
   subtitle,
   icon,
-  bgColor,
-  onTapHintClick,
 }: {
   title: string;
   subtitle: string;
   icon: React.ReactNode;
-  bgColor: string;
-  onTapHintClick?: () => void;
 }) {
   return (
-    <div
-      className="relative flex h-full flex-col items-center justify-center"
-      style={{ backgroundColor: bgColor }}
-    >
-      <div className="flex items-center justify-center text-[52px] text-white">
+    <div className="absolute inset-0 flex flex-col items-center justify-center p-4 [backface-visibility:hidden]">
+      <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15 sm:h-16 sm:w-16 [&>svg]:h-7 [&>svg]:w-7 sm:[&>svg]:h-8 sm:[&>svg]:w-8 [&>svg]:text-white">
         {icon}
       </div>
-      <h2 className="mt-3 text-base font-medium text-white">{title}</h2>
+
+      <h2 className="text-sm font-medium text-white sm:text-base">{title}</h2>
       <p className="mt-1 text-xs text-white/50">{subtitle}</p>
 
-      <button
-        type="button"
-        onClick={(event) => {
-          event.stopPropagation();
-          onTapHintClick?.();
-        }}
-        className="mt-3 flex items-center gap-1.5 rounded-lg border border-white/30 px-3 py-1.5 text-xs text-white/70 md:pointer-events-none md:opacity-0"
-      >
+      <div className="mt-3 flex items-center gap-1.5 rounded-lg border border-dashed border-white/30 px-3 py-1.5 text-xs text-white/70 transition-all duration-200 group-hover:border-white/60 group-hover:text-white/90">
         <TbUpload className="text-xs" />
-        Dosya yüklemek için tıkla
-      </button>
+        Dosya yükle
+      </div>
 
-      <div className="absolute right-3 bottom-3 flex h-7 w-7 items-center justify-center rounded-full bg-white/15 md:block">
-        <TbUpload className="text-xs text-white/70" />
+      <div className="absolute right-3 bottom-3 flex h-6 w-6 items-center justify-center rounded-full bg-white/15">
+        <TbUpload className="text-xs text-white/60" />
       </div>
     </div>
   );
@@ -72,6 +66,7 @@ export default function FileCard({
 }: FileCardProps) {
   const isMobile = useIsMobile();
   const [isFlipped, setIsFlipped] = useState(false);
+  const [isDragOver, setIsDragOver] = useState(false);
   const [outputFormat, setOutputFormat] = useState<OutputFormat>("json");
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -89,6 +84,7 @@ export default function FileCard({
   const handleDrop = (event: React.DragEvent) => {
     event.preventDefault();
     event.stopPropagation();
+    setIsDragOver(false);
     const files = Array.from(event.dataTransfer.files);
     handleFiles(files);
   };
@@ -96,6 +92,13 @@ export default function FileCard({
   const handleDragOver = (event: React.DragEvent) => {
     event.preventDefault();
     event.stopPropagation();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (event: React.DragEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setIsDragOver(false);
   };
 
   const handleDropzoneClick = () => {
@@ -131,23 +134,27 @@ export default function FileCard({
               handleMobileCardClick();
             }
           }}
-          className="relative w-full aspect-square cursor-pointer overflow-hidden rounded-2xl shadow-sm"
+          className="group relative aspect-square w-full cursor-pointer overflow-hidden rounded-2xl shadow-md"
+          style={{ background: bgColor }}
         >
-          <FrontFace
-            title={title}
-            subtitle={subtitle}
-            icon={icon}
-            bgColor={bgColor}
-            onTapHintClick={handleDropzoneClick}
-          />
+          <FrontFace title={title} subtitle={subtitle} icon={icon} />
         </div>
 
         <div className="mt-3">
-          <OutputFormatSelector
+          <label className="mb-1 block text-xs text-gray-500">Çıktı formatı</label>
+          <select
             value={outputFormat}
-            onChange={setOutputFormat}
-            variant="inline"
-          />
+            onChange={(event) =>
+              setOutputFormat(event.target.value as OutputFormat)
+            }
+            className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-[#1D3461] outline-none focus:border-[#1A9BA1]"
+          >
+            {FORMAT_OPTIONS.map(({ value, label }) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
+          </select>
         </div>
 
         {fileInput}
@@ -159,10 +166,13 @@ export default function FileCard({
     <div
       className="group w-full"
       onMouseEnter={() => setIsFlipped(true)}
-      onMouseLeave={() => setIsFlipped(false)}
+      onMouseLeave={() => {
+        setIsFlipped(false);
+        setIsDragOver(false);
+      }}
     >
       <div
-        className="relative w-full aspect-square overflow-hidden rounded-2xl shadow-sm"
+        className="relative aspect-square w-full overflow-hidden rounded-2xl shadow-md"
         style={{ perspective: "1000px" }}
       >
         <motion.div
@@ -172,45 +182,45 @@ export default function FileCard({
           transition={{ duration: 0.6, ease: "easeInOut" }}
         >
           <div
-            className="absolute inset-0"
-            style={{ backfaceVisibility: "hidden" }}
+            className="absolute inset-0 rounded-2xl"
+            style={{ background: bgColor, backfaceVisibility: "hidden" }}
           >
-            <FrontFace
-              title={title}
-              subtitle={subtitle}
-              icon={icon}
-              bgColor={bgColor}
-            />
+            <FrontFace title={title} subtitle={subtitle} icon={icon} />
           </div>
 
           <div
-            className="absolute inset-0 flex flex-col"
+            className="absolute inset-0 flex flex-col rounded-2xl"
             style={{
-              backgroundColor: bgColor,
-              filter: "brightness(0.88)",
+              background: bgColor,
+              filter: isDragOver ? "brightness(1.15)" : "brightness(0.88)",
               backfaceVisibility: "hidden",
               transform: "rotateY(180deg)",
             }}
           >
-            <div className="flex flex-col items-center pt-5 text-center">
-              <div className="text-[32px] text-white">{icon}</div>
-              <p className="mt-1 text-sm text-white/80">{title}</p>
+            {isDragOver ? (
+              <div className="pointer-events-none absolute inset-0 animate-pulse rounded-2xl border-2 border-white/60" />
+            ) : null}
+
+            <div className="flex shrink-0 flex-col items-center pt-4 text-center">
+              <div className="text-[28px] text-white [&>svg]:text-white">{icon}</div>
+              <p className="mt-0.5 text-sm text-white/80">{title}</p>
             </div>
 
-            <div className="px-3 pt-2">
+            <div className="shrink-0 px-2.5 pt-2">
               <OutputFormatSelector
                 value={outputFormat}
                 onChange={setOutputFormat}
               />
             </div>
 
-            <div className="relative mx-4 mt-3 mb-4 flex flex-1 flex-col">
+            <div className="relative mx-3 mt-2 mb-3 flex min-h-[90px] flex-1 flex-col">
               <button
                 type="button"
                 onClick={handleDropzoneClick}
                 onDrop={handleDrop}
                 onDragOver={handleDragOver}
-                className="flex h-full w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-white/40 px-3 text-center text-xs text-white/60 transition hover:border-white/80 hover:bg-white/10"
+                onDragLeave={handleDragLeave}
+                className="flex h-full min-h-[90px] w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-white/40 px-2 py-3 text-center text-xs leading-snug text-white/60 transition hover:border-white/80 hover:bg-white/10"
               >
                 <span>
                   Dosyayı buraya sürükle

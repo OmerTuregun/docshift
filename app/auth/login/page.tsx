@@ -3,12 +3,26 @@ import Link from "next/link";
 import { signIn } from "@/auth";
 import { isGoogleAuthConfigured } from "@/lib/auth-config";
 
-async function signInWithGoogle() {
-  "use server";
-  await signIn("google", { redirectTo: "/" });
+interface LoginPageProps {
+  searchParams: Promise<{ callbackUrl?: string }>;
 }
 
-export default function LoginPage() {
+async function signInWithGoogle(formData: FormData) {
+  "use server";
+
+  const callbackUrl = formData.get("callbackUrl");
+  const redirectTo =
+    typeof callbackUrl === "string" && callbackUrl.startsWith("/")
+      ? callbackUrl
+      : "/";
+
+  await signIn("google", { redirectTo });
+}
+
+export default async function LoginPage({ searchParams }: LoginPageProps) {
+  const { callbackUrl } = await searchParams;
+  const redirectTo =
+    callbackUrl && callbackUrl.startsWith("/") ? callbackUrl : "/";
   const googleReady = isGoogleAuthConfigured();
 
   return (
@@ -52,6 +66,7 @@ export default function LoginPage() {
 
         {googleReady ? (
           <form action={signInWithGoogle}>
+            <input type="hidden" name="callbackUrl" value={redirectTo} />
             <button
               type="submit"
               className="flex w-full items-center justify-center gap-3 rounded-xl border border-gray-200 px-4 py-3 text-sm font-medium text-brand-navy transition hover:border-brand-teal hover:bg-brand-teal-bg"

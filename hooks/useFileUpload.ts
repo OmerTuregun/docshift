@@ -6,10 +6,12 @@ import { nanoid } from "nanoid";
 import { saveAnonConversion } from "@/lib/anonHistory";
 import type { OutputFormat } from "@/lib/converters";
 import { dispatchHistoryUpdated } from "@/lib/historyEvents";
+import { incrementSessionCount } from "@/lib/sessionCount";
 import type { FileType, UploadJob } from "@/types";
 
 export function useFileUpload() {
-  const { data: session } = useSession();
+  const { status } = useSession();
+  const isAuthenticated = status === "authenticated";
   const [jobs, setJobs] = useState<UploadJob[]>([]);
 
   const updateJob = useCallback((id: string, patch: Partial<UploadJob>) => {
@@ -41,10 +43,9 @@ export function useFileUpload() {
 
         updateJob(job.id, { status: "success", result: data.converted });
         window.dispatchEvent(new CustomEvent("stats:updated"));
+        incrementSessionCount();
 
-        if (session?.user?.id) {
-          dispatchHistoryUpdated();
-        } else {
+        if (!isAuthenticated) {
           saveAnonConversion({
             file_name: job.file.name,
             file_type: job.fileType,
@@ -52,8 +53,9 @@ export function useFileUpload() {
             converted_result: data.converted,
             created_at: new Date().toISOString(),
           });
-          dispatchHistoryUpdated();
         }
+
+        dispatchHistoryUpdated();
       } catch (uploadError) {
         const message =
           uploadError instanceof Error ? uploadError.message : "Upload failed";
@@ -61,7 +63,7 @@ export function useFileUpload() {
         updateJob(job.id, { status: "error", error: message });
       }
     },
-    [session?.user?.id, updateJob],
+    [isAuthenticated, updateJob],
   );
 
   const addFiles = useCallback(

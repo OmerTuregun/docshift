@@ -3,11 +3,17 @@
 import { useCallback, useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import AnonBanner from "@/components/AnonBanner";
-import ConversionCounter from "@/components/ConversionCounter";
+import CtaBand from "@/components/CtaBand";
+import FaqSection from "@/components/FaqSection";
+import Footer from "@/components/Footer";
 import FileGrid from "@/components/FileGrid";
 import HeroSection from "@/components/HeroSection";
+import HowItWorks from "@/components/HowItWorks";
 import JobResultList from "@/components/JobResultList";
+import SectionDivider from "@/components/SectionDivider";
+import StatsRow from "@/components/StatsRow";
 import Toast from "@/components/Toast";
+import WhyDocShift from "@/components/WhyDocShift";
 import { useFileUpload } from "@/hooks/useFileUpload";
 
 export default function HomeClient() {
@@ -33,10 +39,18 @@ export default function HomeClient() {
     <div className="min-h-screen bg-white px-4 sm:px-0">
       <main className="w-full">
         <HeroSection />
+        <StatsRow />
         <FileGrid user={session?.user ?? null} addFiles={addFiles} />
-        <AnonBanner isLoggedIn={Boolean(session?.user)} />
-        <ConversionCounter />
         <JobResultList jobs={jobs} clearJobs={clearJobs} onToast={showToast} />
+        <AnonBanner />
+        <SectionDivider />
+        <HowItWorks />
+        <SectionDivider />
+        <WhyDocShift />
+        <SectionDivider />
+        <FaqSection />
+        <CtaBand />
+        <Footer />
         <Toast message={toastMessage} />
       </main>
     </div>

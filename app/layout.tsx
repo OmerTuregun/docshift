@@ -18,7 +18,7 @@ export default async function RootLayout({
 
   return (
     <html lang="tr" className="h-full antialiased">
-      <body className="flex min-h-full flex-col font-sans">
+      <body className="flex min-h-full flex-col font-sans antialiased">
         <Providers session={session}>
           <NavBar session={session} />
           {children}

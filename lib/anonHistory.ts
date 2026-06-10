@@ -1,11 +1,18 @@
-import type { ConversionRecord } from "@/lib/db/history";
+"use client";
 
 const STORAGE_KEY = "docshift_anon_history";
 const MAX_ITEMS = 5;
 
-export type AnonConversionInput = Omit<ConversionRecord, "id" | "user_id">;
+export type AnonRecord = {
+  id: string;
+  file_name: string;
+  file_type: string;
+  output_format: string;
+  converted_result: string;
+  created_at: string;
+};
 
-function readStorage(): ConversionRecord[] {
+function readStorage(): AnonRecord[] {
   if (typeof window === "undefined") {
     return [];
   }
@@ -14,25 +21,22 @@ function readStorage(): ConversionRecord[] {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
 
-    const parsed = JSON.parse(raw) as ConversionRecord[];
+    const parsed = JSON.parse(raw) as AnonRecord[];
     return Array.isArray(parsed) ? parsed : [];
   } catch {
     return [];
   }
 }
 
-function writeStorage(records: ConversionRecord[]) {
+function writeStorage(records: AnonRecord[]) {
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
 }
 
-export function saveAnonConversion(
-  record: AnonConversionInput,
-): ConversionRecord {
+export function saveAnonConversion(record: Omit<AnonRecord, "id">): void {
   const items = readStorage();
-  const newRecord: ConversionRecord = {
+  const newRecord: AnonRecord = {
     ...record,
     id: crypto.randomUUID(),
-    user_id: "anon",
     created_at: record.created_at || new Date().toISOString(),
   };
 
@@ -43,16 +47,14 @@ export function saveAnonConversion(
   }
 
   writeStorage(items);
-  return newRecord;
 }
 
-export function getAnonHistory(): ConversionRecord[] {
+export function getAnonHistory(): AnonRecord[] {
   return readStorage();
 }
 
 export function deleteAnonHistoryItem(id: string): void {
-  const items = readStorage().filter((item) => item.id !== id);
-  writeStorage(items);
+  writeStorage(readStorage().filter((item) => item.id !== id));
 }
 
 export function clearAnonHistory(): void {
