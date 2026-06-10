@@ -56,3 +56,24 @@ CREATE TABLE IF NOT EXISTS conversion_history (
   converted_result TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+CREATE TABLE IF NOT EXISTS api_keys (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  key_hash TEXT UNIQUE NOT NULL,
+  key_prefix TEXT NOT NULL,
+  last_used_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  is_active BOOLEAN DEFAULT true
+);
+
+CREATE TABLE IF NOT EXISTS api_key_usage (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  api_key_id UUID NOT NULL REFERENCES api_keys(id) ON DELETE CASCADE,
+  endpoint TEXT NOT NULL,
+  file_type TEXT,
+  output_format TEXT,
+  status_code INTEGER,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);

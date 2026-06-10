@@ -5,11 +5,14 @@ import {
   TbBrandTwitter,
   TbMail,
 } from "react-icons/tb";
-import { SECTION_LINKS } from "@/lib/siteNav";
+import { HOW_USE_LINK, HOW_USE_PATH, SECTION_LINKS } from "@/lib/siteNav";
 
 const PRODUCT_LINKS = [
   ...SECTION_LINKS,
-  { label: "API (yakında)", href: "#" },
+  {
+    label: HOW_USE_LINK.label,
+    href: `/auth/login?callbackUrl=${HOW_USE_PATH}`,
+  },
 ] as const;
 
 const ACCOUNT_LINKS = [

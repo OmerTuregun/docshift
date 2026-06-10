@@ -44,9 +44,9 @@ const FEATURES = [
   },
   {
     icon: TbCode,
-    title: "API (yakında)",
+    title: "REST & SDK API",
     description:
-      "Kendi uygulamanıza entegre edin. Developer erken erişim listesine katılın.",
+      "cURL veya TypeScript SDK ile kendi uygulamanıza entegre edin.",
   },
 ] as const;
 

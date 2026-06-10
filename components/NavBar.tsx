@@ -8,7 +8,7 @@ import { signOut } from "next-auth/react";
 import { TbHistory, TbMenu2, TbX } from "react-icons/tb";
 import type { Session } from "next-auth";
 import HistoryDrawer from "@/components/HistoryDrawer";
-import { SECTION_LINKS } from "@/lib/siteNav";
+import { HOW_USE_LINK, HOW_USE_PATH, SECTION_LINKS } from "@/lib/siteNav";
 
 interface NavBarProps {
   session: Session | null;
@@ -68,8 +68,7 @@ export default function NavBar({ session }: NavBarProps) {
               alt="DocShift"
               width={160}
               height={32}
-              className="hidden md:block"
-              style={{ height: "2rem", width: "auto" }}
+              className="hidden h-8 w-auto md:block"
               priority
             />
             <Image
@@ -77,8 +76,7 @@ export default function NavBar({ session }: NavBarProps) {
               alt="DocShift"
               width={32}
               height={32}
-              className="md:hidden"
-              style={{ height: "2rem", width: "2rem" }}
+              className="h-8 w-8 md:hidden"
               priority
             />
           </Link>
@@ -96,6 +94,16 @@ export default function NavBar({ session }: NavBarProps) {
                 {link.label}
               </Link>
             ))}
+            <Link
+              href={
+                user
+                  ? HOW_USE_PATH
+                  : `/auth/login?callbackUrl=${HOW_USE_PATH}`
+              }
+              className="rounded-lg px-3 py-2 text-sm text-gray-500 transition-colors hover:bg-[#d0f0f2]/60 hover:text-[#1D3461]"
+            >
+              {HOW_USE_LINK.label}
+            </Link>
           </nav>
 
           <div className="flex items-center gap-1.5 sm:gap-2">
@@ -205,6 +213,17 @@ export default function NavBar({ session }: NavBarProps) {
                   {link.label}
                 </Link>
               ))}
+              <Link
+                href={
+                  user
+                    ? HOW_USE_PATH
+                    : `/auth/login?callbackUrl=${HOW_USE_PATH}`
+                }
+                onClick={() => setMobileNavOpen(false)}
+                className="block rounded-lg px-3 py-2.5 text-sm text-gray-600 transition-colors hover:bg-[#d0f0f2]/60 hover:text-[#1D3461]"
+              >
+                {HOW_USE_LINK.label}
+              </Link>
             </nav>
 
             {!user ? (
