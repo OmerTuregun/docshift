@@ -1,5 +1,5 @@
 import { randomUUID } from "crypto";
-import { pool } from "@/lib/db/pool";
+import pool from "@/lib/db/pool";
 
 export interface ConversionRecord {
   id: string;

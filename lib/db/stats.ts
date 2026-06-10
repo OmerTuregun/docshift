@@ -1,5 +1,5 @@
 import { unstable_cache } from "next/cache";
-import { pool } from "@/lib/db/pool";
+import pool from "@/lib/db/pool";
 
 const TOTAL_CONVERSIONS_KEY = "total_conversions";
 

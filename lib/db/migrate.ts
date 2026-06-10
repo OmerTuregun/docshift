@@ -1,6 +1,6 @@
 import { readFileSync } from "fs";
 import { join } from "path";
-import { pool } from "./pool";
+import pool from "./pool";
 
 export async function runMigrations() {
   const schemaPath = join(process.cwd(), "lib/db/schema.sql");

@@ -28,7 +28,7 @@ function StatCard({ icon, value, label, sub }: StatCardProps) {
 
 export default function StatsRow() {
   const [totalConversions, setTotalConversions] = useState<number | null>(null);
-  const [sessionCount, setSessionCount] = useState(0);
+  const [sessionCount, setSessionCount] = useState(() => getSessionCount());
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -54,8 +54,6 @@ export default function StatsRow() {
   }, []);
 
   useEffect(() => {
-    setSessionCount(getSessionCount());
-
     const handleConversionDone = () => {
       setSessionCount(getSessionCount());
     };

@@ -3,19 +3,12 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   output: "standalone",
   devIndicators: false,
-  serverExternalPackages: [
-    "pdf-parse",
-    "pptx2json",
-    "mammoth",
-    "xlsx",
-    "pg",
-    "@auth/pg-adapter",
-  ],
   images: {
     remotePatterns: [
       {
         protocol: "https",
         hostname: "lh3.googleusercontent.com",
+        pathname: "/**",
       },
     ],
   },

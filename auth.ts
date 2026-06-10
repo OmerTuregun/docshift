@@ -2,7 +2,7 @@ import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 import PostgresAdapter from "@auth/pg-adapter";
 import { isGoogleAuthConfigured } from "@/lib/auth-config";
-import { pool } from "@/lib/db/pool";
+import pool from "@/lib/db/pool";
 
 const googleClientId = process.env.AUTH_GOOGLE_ID;
 const googleClientSecret = process.env.AUTH_GOOGLE_SECRET;

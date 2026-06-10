@@ -85,7 +85,12 @@ export function useHistory(isOpen: boolean) {
 
   useEffect(() => {
     if (!isOpen || status === "loading") return;
-    void fetchHistory();
+
+    const timer = window.setTimeout(() => {
+      void fetchHistory();
+    }, 0);
+
+    return () => window.clearTimeout(timer);
   }, [fetchHistory, isOpen, status]);
 
   useEffect(() => {

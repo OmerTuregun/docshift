@@ -18,7 +18,7 @@ export default function FaqSection() {
     <section
       id="faq"
       ref={ref}
-      className="mx-auto max-w-4xl scroll-mt-20 px-4 py-12 sm:px-6 sm:py-16"
+      className="mx-auto max-w-4xl scroll-mt-20 px-4 pt-14 pb-12 sm:px-6 sm:pt-16 sm:pb-16"
     >
       <motion.div
         className="mb-10 text-center"

@@ -45,9 +45,7 @@ export default function HomeClient() {
         <AnonBanner />
         <SectionDivider />
         <HowItWorks />
-        <SectionDivider />
         <WhyDocShift />
-        <SectionDivider />
         <FaqSection />
         <CtaBand />
         <Footer />
