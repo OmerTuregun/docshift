@@ -8,6 +8,7 @@ import { saveAnonConversion } from "@/lib/anonHistory";
 import type { OutputFormat } from "@/lib/converters";
 import { dispatchHistoryUpdated } from "@/lib/historyEvents";
 import { incrementSessionCount } from "@/lib/sessionCount";
+import { downloadZip } from "@/lib/downloadZip";
 import { validateFile } from "@/lib/validateFile";
 import type { FileType, UploadJob } from "@/types";
 
@@ -231,5 +232,34 @@ export function useFileUpload() {
     [isAuthenticated, updateJob],
   );
 
-  return { jobs, addFiles, clearJobs, chainConvert, retryJob };
+  const downloadAllAsZip = useCallback(async () => {
+    const successfulJobs = jobs.filter(
+      (job) => job.status === "success" && job.result != null,
+    );
+
+    if (successfulJobs.length < 2) {
+      return;
+    }
+
+    await downloadZip(
+      successfulJobs.map((job) => ({
+        fileName: job.file.name,
+        outputFormat: job.outputFormat,
+        result: job.result!,
+      })),
+    );
+  }, [jobs]);
+
+  const hasMultipleSuccessful =
+    jobs.filter((job) => job.status === "success").length >= 2;
+
+  return {
+    jobs,
+    addFiles,
+    clearJobs,
+    chainConvert,
+    retryJob,
+    downloadAllAsZip,
+    hasMultipleSuccessful,
+  };
 }

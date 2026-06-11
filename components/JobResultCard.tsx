@@ -18,6 +18,7 @@ import MarkdownPreview from "@/components/MarkdownPreview";
 import PreviewToggle from "@/components/PreviewToggle";
 import { showToast } from "@/components/Toast";
 import { FILE_SIZE_LIMIT_MB } from "@/lib/constants";
+import { getFileExtension, sanitizeFileName } from "@/lib/downloadZip";
 import type { OutputFormat } from "@/lib/converters";
 import type { FileType, UploadJob } from "@/types";
 
@@ -26,13 +27,6 @@ const FILE_TYPE_COLORS: Record<FileType, string> = {
   word: "#2B579A",
   pdf: "#F40F02",
   powerpoint: "#D24726",
-};
-
-const EXTENSION_BY_FORMAT: Record<OutputFormat, string> = {
-  json: "json",
-  xml: "xml",
-  markdown: "md",
-  plaintext: "txt",
 };
 
 const FORMAT_LABELS: Record<OutputFormat, string> = {
@@ -97,14 +91,14 @@ export default function JobResultCard({
   const handleDownload = () => {
     if (!job.result) return;
 
-    const extension = EXTENSION_BY_FORMAT[job.outputFormat];
-    const baseName = job.file.name.replace(/\.[^.]+$/, "");
-    const blob = new Blob([job.result], { type: "text/plain;charset=utf-8" });
+    const ext = getFileExtension(job.outputFormat);
+    const fileName = sanitizeFileName(job.file.name) + ext;
+    const blob = new Blob([job.result], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
 
     link.href = url;
-    link.download = `${baseName}.${extension}`;
+    link.download = fileName;
     link.click();
     URL.revokeObjectURL(url);
   };

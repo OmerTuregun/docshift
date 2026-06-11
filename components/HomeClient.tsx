@@ -16,7 +16,15 @@ import { useFileUpload } from "@/hooks/useFileUpload";
 
 export default function HomeClient() {
   const { data: session } = useSession();
-  const { jobs, addFiles, clearJobs, chainConvert, retryJob } = useFileUpload();
+  const {
+    jobs,
+    addFiles,
+    clearJobs,
+    chainConvert,
+    retryJob,
+    downloadAllAsZip,
+    hasMultipleSuccessful,
+  } = useFileUpload();
 
   return (
     <div className="min-h-screen bg-white px-4 sm:px-0">
@@ -29,6 +37,8 @@ export default function HomeClient() {
           clearJobs={clearJobs}
           chainConvert={chainConvert}
           retryJob={retryJob}
+          onDownloadAll={downloadAllAsZip}
+          hasMultipleSuccessful={hasMultipleSuccessful}
         />
         <AnonBanner />
         <SectionDivider />
