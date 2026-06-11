@@ -6,9 +6,10 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { AnimatePresence } from "framer-motion";
 import { signOut } from "next-auth/react";
-import { TbHistory, TbMenu2, TbX } from "react-icons/tb";
+import { TbHistory, TbMenu2, TbSearch, TbX } from "react-icons/tb";
 import type { Session } from "next-auth";
 import HistoryDrawer from "@/components/HistoryDrawer";
+import SmartSearch from "@/components/SmartSearch";
 import { useFileUploadContext } from "@/contexts/FileUploadContext";
 import { HOW_USE_LINK, HOW_USE_PATH, SECTION_LINKS } from "@/lib/siteNav";
 
@@ -37,6 +38,7 @@ export default function NavBar({ session }: NavBarProps) {
   const [historyOpen, setHistoryOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -103,9 +105,13 @@ export default function NavBar({ session }: NavBarProps) {
             />
           </Link>
 
+          <div className="mx-auto hidden max-w-sm flex-1 justify-center px-4 sm:flex">
+            <SmartSearch onOpenHistory={() => setHistoryOpen(true)} />
+          </div>
+
           <nav
             aria-label="Sayfa bölümleri"
-            className="hidden flex-1 items-center justify-center gap-1 lg:flex"
+            className="hidden items-center justify-center gap-1 lg:flex"
           >
             {SECTION_LINKS.map((link) =>
               link.href === "#file-cards" ? (
@@ -140,6 +146,14 @@ export default function NavBar({ session }: NavBarProps) {
           </nav>
 
           <div className="flex items-center gap-1.5 sm:gap-2">
+            <button
+              type="button"
+              aria-label="Ara"
+              onClick={() => setMobileSearchOpen((open) => !open)}
+              className="rounded-lg p-2 text-[#1D3461] transition hover:bg-gray-100 sm:hidden"
+            >
+              <TbSearch className="text-lg" />
+            </button>
             <button
               type="button"
               aria-label={mobileNavOpen ? "Menüyü kapat" : "Menüyü aç"}
@@ -232,6 +246,18 @@ export default function NavBar({ session }: NavBarProps) {
             )}
           </div>
         </div>
+
+        {mobileSearchOpen ? (
+          <div className="border-b border-gray-100 bg-white px-4 py-2 sm:hidden">
+            <SmartSearch
+              className="w-full [&_div:first-child]:w-full [&_div:first-child]:focus-within:w-full"
+              onOpenHistory={() => {
+                setHistoryOpen(true);
+                setMobileSearchOpen(false);
+              }}
+            />
+          </div>
+        ) : null}
 
         {mobileNavOpen ? (
           <div className="border-t border-gray-100 bg-white px-4 py-4 lg:hidden">
