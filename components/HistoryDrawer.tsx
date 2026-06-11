@@ -1,20 +1,26 @@
 "use client";
 
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { signOut, useSession } from "next-auth/react";
 import { TbHistory, TbLogout, TbRefresh, TbX } from "react-icons/tb";
 import HistoryItem from "@/components/HistoryItem";
+import ReconvertModal from "@/components/ReconvertModal";
+import { showToast } from "@/components/Toast";
 import { useHistory } from "@/hooks/useHistory";
+import type { OutputFormat } from "@/lib/converters";
 import type { ConversionRecord } from "@/lib/db/history";
 import { groupHistoryByDate } from "@/lib/groupHistoryByDate";
 
 interface HistoryDrawerProps {
   isOpen: boolean;
   onClose: () => void;
+  onReconvert: (
+    record: ConversionRecord,
+    toFormat: OutputFormat,
+  ) => Promise<void>;
 }
 
 function getInitials(name?: string | null, email?: string | null): string {
@@ -51,31 +57,38 @@ function HistorySkeleton() {
   );
 }
 
-export default function HistoryDrawer({ isOpen, onClose }: HistoryDrawerProps) {
-  const router = useRouter();
-  const pathname = usePathname();
+export default function HistoryDrawer({
+  isOpen,
+  onClose,
+  onReconvert,
+}: HistoryDrawerProps) {
   const { data: session, status } = useSession();
   const isAuthenticated = status === "authenticated";
   const { history, isLoading, error, deleteItem, refetch } = useHistory(isOpen);
+  const [reconvertRecord, setReconvertRecord] =
+    useState<ConversionRecord | null>(null);
+  const [isReconverting, setIsReconverting] = useState(false);
 
-  const handleReconvert = useCallback(
-    (_record: ConversionRecord) => {
-      onClose();
+  const handleReconvert = useCallback((record: ConversionRecord) => {
+    setReconvertRecord(record);
+  }, []);
 
-      const scrollToFileCards = () => {
-        document.getElementById("file-cards")?.scrollIntoView({
-          behavior: "smooth",
-        });
-      };
+  const handleReconvertConfirm = useCallback(
+    async (record: ConversionRecord, toFormat: OutputFormat) => {
+      setIsReconverting(true);
 
-      if (pathname === "/") {
-        scrollToFileCards();
-      } else {
-        router.push("/");
-        setTimeout(scrollToFileCards, 300);
+      try {
+        await onReconvert(record, toFormat);
+        setReconvertRecord(null);
+        onClose();
+        showToast("Dönüşüm başlatıldı", "success");
+      } catch {
+        showToast("Dönüşüm başarısız", "error");
+      } finally {
+        setIsReconverting(false);
       }
     },
-    [onClose, pathname, router],
+    [onClose, onReconvert],
   );
 
   useEffect(() => {
@@ -255,6 +268,15 @@ export default function HistoryDrawer({ isOpen, onClose }: HistoryDrawerProps) {
           </div>
         ) : null}
       </motion.div>
+
+      <ReconvertModal
+        record={reconvertRecord}
+        onClose={() => setReconvertRecord(null)}
+        onConfirm={(record, toFormat) => {
+          void handleReconvertConfirm(record, toFormat);
+        }}
+        isLoading={isReconverting}
+      />
     </>
   );
 }

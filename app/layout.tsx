@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { auth } from "@/auth";
 import NavBar from "@/components/NavBar";
 import Providers from "@/components/Providers";
+import { FileUploadProvider } from "@/contexts/FileUploadContext";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -20,8 +21,10 @@ export default async function RootLayout({
     <html lang="tr" className="h-full antialiased" data-scroll-behavior="smooth">
       <body className="flex min-h-full flex-col font-sans antialiased">
         <Providers session={session}>
-          <NavBar session={session} />
-          {children}
+          <FileUploadProvider>
+            <NavBar session={session} />
+            {children}
+          </FileUploadProvider>
         </Providers>
       </body>
     </html>

@@ -12,7 +12,7 @@ import JobResultList from "@/components/JobResultList";
 import SectionDivider from "@/components/SectionDivider";
 import StatsRow from "@/components/StatsRow";
 import WhyDocShift from "@/components/WhyDocShift";
-import { useFileUpload } from "@/hooks/useFileUpload";
+import { useFileUploadContext } from "@/contexts/FileUploadContext";
 
 export default function HomeClient() {
   const { data: session } = useSession();
@@ -24,7 +24,7 @@ export default function HomeClient() {
     retryJob,
     downloadAllAsZip,
     hasMultipleSuccessful,
-  } = useFileUpload();
+  } = useFileUploadContext();
 
   return (
     <div className="min-h-screen bg-white px-4 sm:px-0">

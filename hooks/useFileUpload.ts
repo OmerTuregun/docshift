@@ -9,6 +9,7 @@ import type { OutputFormat } from "@/lib/converters";
 import { dispatchHistoryUpdated } from "@/lib/historyEvents";
 import { incrementSessionCount } from "@/lib/sessionCount";
 import { downloadZip } from "@/lib/downloadZip";
+import type { ConversionRecord } from "@/lib/db/history";
 import { validateFile } from "@/lib/validateFile";
 import type { FileType, UploadJob } from "@/types";
 
@@ -232,6 +233,84 @@ export function useFileUpload() {
     [isAuthenticated, updateJob],
   );
 
+  const reconvertFromHistory = useCallback(
+    async (record: ConversionRecord, toFormat: OutputFormat) => {
+      const fromFormat = record.output_format as OutputFormat;
+
+      if (toFormat === fromFormat) {
+        throw new Error("Aynı formata dönüştürülemez");
+      }
+
+      const fileType = record.file_type as FileType;
+      const chainedJob: UploadJob = {
+        id: crypto.randomUUID(),
+        file: new File([record.converted_result], record.file_name, {
+          type: "text/plain",
+        }),
+        fileType,
+        outputFormat: toFormat,
+        status: "loading",
+        isChained: true,
+        chainedFrom: fromFormat,
+      };
+
+      setJobs((prev) => [...prev, chainedJob]);
+
+      try {
+        const response = await fetch("/api/convert-chain", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            content: record.converted_result,
+            fromFormat: record.output_format,
+            toFormat,
+            fileName: record.file_name,
+            fileType: record.file_type,
+          }),
+        });
+
+        const data = await response.json();
+
+        if (response.status === 429) {
+          handleRateLimitedResponse(data, updateJob, chainedJob.id);
+          throw new Error(data.error ?? "Rate limited");
+        }
+
+        if (!response.ok || !data.success) {
+          throw new Error(data.error ?? "Reconvert failed");
+        }
+
+        updateJob(chainedJob.id, {
+          status: "success",
+          result: data.converted,
+        });
+        window.dispatchEvent(new CustomEvent("stats:updated"));
+        incrementSessionCount();
+
+        if (!isAuthenticated) {
+          saveAnonConversion({
+            file_name: `${record.file_name} (${fromFormat}→${toFormat})`,
+            file_type: fileType,
+            output_format: toFormat,
+            converted_result: data.converted,
+            created_at: new Date().toISOString(),
+          });
+        }
+
+        dispatchHistoryUpdated();
+      } catch (reconvertError) {
+        const message =
+          reconvertError instanceof Error
+            ? reconvertError.message
+            : "Reconvert failed";
+
+        updateJob(chainedJob.id, { status: "error", error: message });
+        throw reconvertError;
+      }
+    },
+    [isAuthenticated, updateJob],
+  );
+
   const downloadAllAsZip = useCallback(async () => {
     const successfulJobs = jobs.filter(
       (job) => job.status === "success" && job.result != null,
@@ -261,5 +340,6 @@ export function useFileUpload() {
     retryJob,
     downloadAllAsZip,
     hasMultipleSuccessful,
+    reconvertFromHistory,
   };
 }

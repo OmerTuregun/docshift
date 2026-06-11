@@ -9,6 +9,7 @@ import { signOut } from "next-auth/react";
 import { TbHistory, TbMenu2, TbX } from "react-icons/tb";
 import type { Session } from "next-auth";
 import HistoryDrawer from "@/components/HistoryDrawer";
+import { useFileUploadContext } from "@/contexts/FileUploadContext";
 import { HOW_USE_LINK, HOW_USE_PATH, SECTION_LINKS } from "@/lib/siteNav";
 
 interface NavBarProps {
@@ -31,6 +32,7 @@ function getInitials(name?: string | null, email?: string | null): string {
 export default function NavBar({ session }: NavBarProps) {
   const router = useRouter();
   const pathname = usePathname();
+  const { reconvertFromHistory } = useFileUploadContext();
   const user = session?.user ?? null;
   const [historyOpen, setHistoryOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -296,6 +298,7 @@ export default function NavBar({ session }: NavBarProps) {
             key="history-drawer"
             isOpen={historyOpen}
             onClose={() => setHistoryOpen(false)}
+            onReconvert={reconvertFromHistory}
           />
         ) : null}
       </AnimatePresence>
