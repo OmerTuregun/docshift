@@ -21,6 +21,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     Google({
       clientId: googleClientId ?? "",
       clientSecret: googleClientSecret ?? "",
+      authorization: {
+        params: {
+          scope: [
+            "openid",
+            "email",
+            "profile",
+            "https://www.googleapis.com/auth/drive.readonly",
+          ].join(" "),
+          access_type: "offline",
+          prompt: "consent",
+        },
+      },
     }),
   ],
   trustHost: true,

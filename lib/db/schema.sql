@@ -89,6 +89,9 @@ CREATE TABLE IF NOT EXISTS webhooks (
   UNIQUE(user_id)
 );
 
+ALTER TABLE accounts
+  ADD COLUMN IF NOT EXISTS access_token TEXT;
+
 CREATE TABLE IF NOT EXISTS webhook_deliveries (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   webhook_id UUID NOT NULL REFERENCES webhooks(id) ON DELETE CASCADE,

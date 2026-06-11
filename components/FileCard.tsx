@@ -3,7 +3,9 @@
 import { useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { TbUpload } from "react-icons/tb";
+import DriveFilePicker from "@/components/DriveFilePicker";
 import OutputFormatSelector from "@/components/OutputFormatSelector";
+import { useFileUploadContext } from "@/contexts/FileUploadContext";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { FILE_SIZE_LIMIT_BYTES, FILE_SIZE_LIMIT_MB } from "@/lib/constants";
 import type { OutputFormat } from "@/lib/converters";
@@ -69,7 +71,9 @@ export default function FileCard({
   addFiles,
 }: FileCardProps) {
   const isMobile = useIsMobile();
+  const { uploadFromDrive } = useFileUploadContext();
   const [isFlipped, setIsFlipped] = useState(false);
+  const [isDriveLoading, setIsDriveLoading] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
   const [isDragOverTooLarge, setIsDragOverTooLarge] = useState(false);
   const [outputFormat, setOutputFormat] = useState<OutputFormat>("json");
@@ -78,6 +82,24 @@ export default function FileCard({
   const handleFiles = (files: File[]) => {
     if (files.length === 0) return;
     addFiles(files, fileType, outputFormat);
+  };
+
+  const handleDriveSelect = async (
+    fileId: string,
+    fileName: string,
+    selectedFileType: FileType,
+  ) => {
+    if (selectedFileType !== fileType) {
+      return;
+    }
+
+    setIsDriveLoading(true);
+
+    try {
+      await uploadFromDrive(fileId, fileName, fileType, outputFormat);
+    } finally {
+      setIsDriveLoading(false);
+    }
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -172,6 +194,14 @@ export default function FileCard({
           </select>
         </div>
 
+        <div className="mt-3 flex justify-center">
+          <DriveFilePicker
+            onFileSelected={handleDriveSelect}
+            isLoading={isDriveLoading}
+            variant="light"
+          />
+        </div>
+
         {fileInput}
       </div>
     );
@@ -260,6 +290,18 @@ export default function FileCard({
                   </>
                 )}
               </button>
+            </div>
+
+            <div className="px-4 pb-4">
+              <div className="mb-2 flex items-center gap-2">
+                <div className="h-px flex-1 bg-white/10" />
+                <span className="text-[10px] text-white/30">veya</span>
+                <div className="h-px flex-1 bg-white/10" />
+              </div>
+              <DriveFilePicker
+                onFileSelected={handleDriveSelect}
+                isLoading={isDriveLoading}
+              />
             </div>
 
             {fileInput}

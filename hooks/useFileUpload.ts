@@ -114,6 +114,50 @@ export function useFileUpload() {
     [updateJob, uploadJob],
   );
 
+  const uploadFromDrive = useCallback(
+    async (
+      fileId: string,
+      fileName: string,
+      fileType: FileType,
+      outputFormat: OutputFormat,
+    ) => {
+      const res = await fetch(
+        `/api/drive/download?fileId=${encodeURIComponent(fileId)}&fileName=${encodeURIComponent(fileName)}`,
+      );
+
+      if (!res.ok) {
+        const err = (await res.json()) as { error?: string };
+        showToast(err.error ?? "Drive hatası", "error");
+        return;
+      }
+
+      const { data: base64, mimeType } = (await res.json()) as {
+        data: string;
+        mimeType: string;
+      };
+
+      const byteArray = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
+      const blob = new Blob([byteArray], {
+        type: mimeType || "application/octet-stream",
+      });
+      const file = new File([blob], fileName, {
+        type: mimeType || "application/octet-stream",
+      });
+
+      const job: UploadJob = {
+        id: crypto.randomUUID(),
+        file,
+        fileType,
+        outputFormat,
+        status: "loading",
+      };
+
+      setJobs((prev) => [...prev, job]);
+      await uploadJob(job);
+    },
+    [uploadJob],
+  );
+
   const addFiles = useCallback(
     (files: File[], fileType: FileType, format: OutputFormat) => {
       const validFiles: File[] = [];
@@ -382,6 +426,7 @@ export function useFileUpload() {
   return {
     jobs,
     addFiles,
+    uploadFromDrive,
     clearJobs,
     chainConvert,
     retryJob,
