@@ -8,12 +8,14 @@ interface JobResultListProps {
   jobs: UploadJob[];
   clearJobs: () => void;
   chainConvert: (job: UploadJob, toFormat: OutputFormat) => Promise<void>;
+  retryJob: (job: UploadJob) => void;
 }
 
 export default function JobResultList({
   jobs,
   clearJobs,
   chainConvert,
+  retryJob,
 }: JobResultListProps) {
   if (jobs.length === 0) return null;
 
@@ -36,6 +38,7 @@ export default function JobResultList({
             key={job.id}
             job={job}
             onChain={(toFormat) => void chainConvert(job, toFormat)}
+            onRetry={retryJob}
           />
         ))}
       </div>

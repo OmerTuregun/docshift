@@ -3,13 +3,32 @@
 import { useCallback, useState } from "react";
 import { useSession } from "next-auth/react";
 import { nanoid } from "nanoid";
+import { showToast } from "@/components/Toast";
 import { saveAnonConversion } from "@/lib/anonHistory";
 import type { OutputFormat } from "@/lib/converters";
 import { dispatchHistoryUpdated } from "@/lib/historyEvents";
 import { incrementSessionCount } from "@/lib/sessionCount";
 import { validateFile } from "@/lib/validateFile";
-import { showToast } from "@/components/Toast";
 import type { FileType, UploadJob } from "@/types";
+
+function handleRateLimitedResponse(
+  data: { error?: string; retryAfter?: number },
+  updateJob: (id: string, patch: Partial<UploadJob>) => void,
+  jobId: string,
+) {
+  const retryAfter = data.retryAfter ?? 60;
+
+  showToast(
+    data.error ?? "Çok fazla istek. Lütfen bekleyin.",
+    "error",
+    6000,
+  );
+
+  updateJob(jobId, {
+    status: "error",
+    error: `rate_limited:${retryAfter}`,
+  });
+}
 
 export function useFileUpload() {
   const { status } = useSession();
@@ -24,7 +43,7 @@ export function useFileUpload() {
 
   const uploadJob = useCallback(
     async (job: UploadJob) => {
-      updateJob(job.id, { status: "loading" });
+      updateJob(job.id, { status: "loading", error: undefined });
 
       try {
         const formData = new FormData();
@@ -38,6 +57,11 @@ export function useFileUpload() {
         });
 
         const data = await response.json();
+
+        if (response.status === 429) {
+          handleRateLimitedResponse(data, updateJob, job.id);
+          return;
+        }
 
         if (!response.ok || !data.success) {
           throw new Error(data.error ?? "Upload failed");
@@ -66,6 +90,26 @@ export function useFileUpload() {
       }
     },
     [isAuthenticated, updateJob],
+  );
+
+  const retryJob = useCallback(
+    (job: UploadJob) => {
+      const resetJob: UploadJob = {
+        ...job,
+        status: "idle",
+        error: undefined,
+        result: undefined,
+      };
+
+      updateJob(job.id, {
+        status: "idle",
+        error: undefined,
+        result: undefined,
+      });
+
+      void uploadJob(resetJob);
+    },
+    [updateJob, uploadJob],
   );
 
   const addFiles = useCallback(
@@ -148,6 +192,11 @@ export function useFileUpload() {
 
         const data = await response.json();
 
+        if (response.status === 429) {
+          handleRateLimitedResponse(data, updateJob, chainedJob.id);
+          return;
+        }
+
         if (!response.ok || !data.success) {
           throw new Error(data.error ?? "Chain conversion failed");
         }
@@ -182,5 +231,5 @@ export function useFileUpload() {
     [isAuthenticated, updateJob],
   );
 
-  return { jobs, addFiles, clearJobs, chainConvert };
+  return { jobs, addFiles, clearJobs, chainConvert, retryJob };
 }

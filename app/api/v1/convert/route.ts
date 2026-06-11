@@ -24,6 +24,8 @@ function errorResponse(
 }
 
 export async function POST(request: Request) {
+  // Rate limiting handled via API key (see lib/db/apiKeys.ts)
+
   const authHeader = request.headers.get("Authorization");
 
   if (!authHeader?.startsWith("Bearer ")) {

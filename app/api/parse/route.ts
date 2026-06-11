@@ -1,5 +1,6 @@
-import { NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 import { auth } from "@/auth";
+import { applyRateLimit } from "@/lib/applyRateLimit";
 import { FILE_SIZE_ERROR, FILE_SIZE_LIMIT_BYTES } from "@/lib/constants";
 import { convert, isOutputFormat, type OutputFormat } from "@/lib/converters";
 import { saveConversion } from "@/lib/db/history";
@@ -31,6 +32,15 @@ function isFileType(value: string): value is FileType {
 }
 
 export async function POST(request: Request) {
+  const { blocked, headers: rlHeaders } = await applyRateLimit(
+    request as NextRequest,
+    "/api/parse",
+  );
+
+  if (blocked) {
+    return blocked;
+  }
+
   try {
     const formData = await request.formData();
     const file = formData.get("file");
@@ -103,13 +113,16 @@ export async function POST(request: Request) {
 
     await incrementConversionCount();
 
-    return NextResponse.json({
-      success: true,
-      fileType,
-      outputFormat,
-      raw,
-      converted,
-    });
+    return NextResponse.json(
+      {
+        success: true,
+        fileType,
+        outputFormat,
+        raw,
+        converted,
+      },
+      { headers: rlHeaders },
+    );
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Failed to parse file";

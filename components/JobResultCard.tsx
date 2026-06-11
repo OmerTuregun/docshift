@@ -4,11 +4,13 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import {
   TbCheck,
+  TbClock,
   TbCopy,
   TbDownload,
   TbFileOff,
   TbLink,
   TbLoader2,
+  TbRefresh,
   TbX,
 } from "react-icons/tb";
 import { showToast } from "@/components/Toast";
@@ -49,6 +51,15 @@ const CHAIN_BUTTON_LABELS: Record<OutputFormat, string> = {
 interface JobResultCardProps {
   job: UploadJob;
   onChain: (toFormat: OutputFormat) => void;
+  onRetry: (job: UploadJob) => void;
+}
+
+function isRateLimitedError(error?: string): boolean {
+  return Boolean(error?.startsWith("rate_limited:"));
+}
+
+function getRateLimitRetryAfter(error?: string): string {
+  return error?.split(":")[1] ?? "60";
 }
 
 function isFileTooLargeError(error?: string): boolean {
@@ -64,6 +75,7 @@ function isFileTooLargeError(error?: string): boolean {
 export default function JobResultCard({
   job,
   onChain,
+  onRetry,
 }: JobResultCardProps) {
   const [showError, setShowError] = useState(false);
 
@@ -133,8 +145,31 @@ export default function JobResultCard({
                 <TbX size={16} />
               </button>
               {showError && job.error ? (
-                <div className="absolute right-0 bottom-full z-50 mb-2 w-52 rounded-lg bg-red-900/90 px-3 py-2 text-xs text-white shadow-lg">
-                  {isFileTooLargeError(job.error) ? (
+                <div className="absolute right-0 bottom-full z-50 mb-2 w-56 rounded-lg bg-red-900/90 px-3 py-2 text-xs text-white shadow-lg">
+                  {isRateLimitedError(job.error) ? (
+                    <div>
+                      <div className="flex items-center gap-2 text-amber-400">
+                        <TbClock className="shrink-0 text-base" />
+                        <div>
+                          <div className="text-xs font-medium text-white">
+                            İstek limiti aşıldı
+                          </div>
+                          <div className="mt-0.5 text-[10px] text-amber-200/80">
+                            {getRateLimitRetryAfter(job.error)} saniye sonra tekrar
+                            deneyin
+                          </div>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => onRetry(job)}
+                        className="mt-2 flex items-center rounded-lg border border-amber-400/30 px-3 py-1 text-xs text-amber-300 transition hover:bg-amber-400/10"
+                      >
+                        <TbRefresh className="mr-1 text-xs" />
+                        Tekrar dene
+                      </button>
+                    </div>
+                  ) : isFileTooLargeError(job.error) ? (
                     <div className="flex items-center gap-2 text-red-400">
                       <TbFileOff className="shrink-0 text-base" />
                       <div>

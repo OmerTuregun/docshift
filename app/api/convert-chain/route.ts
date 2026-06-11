@@ -1,5 +1,6 @@
-import { NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 import { auth } from "@/auth";
+import { applyRateLimit } from "@/lib/applyRateLimit";
 import {
   convertFromString,
   isOutputFormat,
@@ -31,6 +32,15 @@ interface ConvertChainBody {
 }
 
 export async function POST(request: Request) {
+  const { blocked, headers: rlHeaders } = await applyRateLimit(
+    request as NextRequest,
+    "/api/convert-chain",
+  );
+
+  if (blocked) {
+    return blocked;
+  }
+
   try {
     const body = (await request.json()) as ConvertChainBody;
     const {
@@ -82,12 +92,15 @@ export async function POST(request: Request) {
 
     await incrementConversionCount();
 
-    return NextResponse.json({
-      success: true,
-      converted,
-      fromFormat,
-      toFormat,
-    });
+    return NextResponse.json(
+      {
+        success: true,
+        converted,
+        fromFormat,
+        toFormat,
+      },
+      { headers: rlHeaders },
+    );
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Dönüşüm yapılamadı";
