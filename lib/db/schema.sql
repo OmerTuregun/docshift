@@ -77,3 +77,27 @@ CREATE TABLE IF NOT EXISTS api_key_usage (
   status_code INTEGER,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+CREATE TABLE IF NOT EXISTS webhooks (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  url TEXT NOT NULL,
+  secret TEXT NOT NULL,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(user_id)
+);
+
+CREATE TABLE IF NOT EXISTS webhook_deliveries (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  webhook_id UUID NOT NULL REFERENCES webhooks(id) ON DELETE CASCADE,
+  conversion_id TEXT,
+  payload JSONB NOT NULL,
+  response_status INTEGER,
+  response_body TEXT,
+  attempt_count INTEGER DEFAULT 1,
+  delivered_at TIMESTAMPTZ,
+  failed_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);

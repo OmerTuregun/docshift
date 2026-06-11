@@ -1,9 +1,12 @@
+import { config } from "dotenv";
 import { readFileSync } from "fs";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
 import pg from "pg";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
+
+config({ path: join(__dirname, "../.env.local") });
 
 const pool = new pg.Pool({
   connectionString: process.env.DATABASE_URL,

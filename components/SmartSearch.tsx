@@ -9,6 +9,7 @@ import {
   useSmartSearch,
   type SearchResult,
 } from "@/hooks/useSmartSearch";
+import { navigateToSection } from "@/lib/scrollToSection";
 
 interface SmartSearchProps {
   onOpenHistory: () => void;
@@ -66,18 +67,7 @@ export default function SmartSearch({
     switch (result.action) {
       case "scroll": {
         clearSearch();
-        const scrollToTarget = () => {
-          document
-            .getElementById(result.payload ?? "")
-            ?.scrollIntoView({ behavior: "smooth" });
-        };
-
-        if (pathname !== "/") {
-          router.push("/");
-          setTimeout(scrollToTarget, 300);
-        } else {
-          scrollToTarget();
-        }
+        navigateToSection(`#${result.payload ?? ""}`, pathname, router);
         break;
       }
       case "open-history":

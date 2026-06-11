@@ -1,6 +1,8 @@
 "use client";
 
+import { useEffect } from "react";
 import { useSession } from "next-auth/react";
+import { scrollToSection } from "@/lib/scrollToSection";
 import AnonBanner from "@/components/AnonBanner";
 import CtaBand from "@/components/CtaBand";
 import FaqSection from "@/components/FaqSection";
@@ -25,6 +27,14 @@ export default function HomeClient() {
     downloadAllAsZip,
     hasMultipleSuccessful,
   } = useFileUploadContext();
+
+  useEffect(() => {
+    const hash = window.location.hash.slice(1);
+
+    if (hash) {
+      requestAnimationFrame(() => scrollToSection(hash));
+    }
+  }, []);
 
   return (
     <div className="min-h-screen bg-white px-4 sm:px-0">

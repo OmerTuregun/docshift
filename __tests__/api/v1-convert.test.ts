@@ -23,6 +23,10 @@ jest.mock("@/lib/db/stats", () => ({
   incrementConversionCount: jest.fn(async () => undefined),
 }));
 
+jest.mock("@/lib/webhook", () => ({
+  triggerWebhook: jest.fn(async () => undefined),
+}));
+
 jest.mock("@/lib/parsers", () => ({
   parseExcel: jest.fn(() => [{ sheetName: "Sheet1", rows: [{ a: 1 }] }]),
   parseWord: jest.fn(),

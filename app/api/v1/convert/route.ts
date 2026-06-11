@@ -8,6 +8,7 @@ import {
 } from "@/lib/db/apiKeys";
 import { saveConversion } from "@/lib/db/history";
 import { incrementConversionCount } from "@/lib/db/stats";
+import { triggerWebhook, type WebhookPayload } from "@/lib/webhook";
 import { detectFileType } from "@/lib/detectFileType";
 import { parseUploadedFile } from "@/lib/parseUploadedFile";
 
@@ -119,6 +120,20 @@ export async function POST(request: Request) {
       outputFormat,
       convertedResult: converted,
     });
+
+    const webhookPayload: WebhookPayload = {
+      event: "conversion.completed",
+      timestamp: new Date().toISOString(),
+      data: {
+        file_name: file.name,
+        file_type: fileType,
+        output_format: outputFormat,
+        converted_result: converted,
+        user_id: userId,
+      },
+    };
+
+    triggerWebhook(userId, webhookPayload).catch(console.error);
 
     await incrementConversionCount();
 

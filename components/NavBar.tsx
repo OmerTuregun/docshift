@@ -3,13 +3,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
 import { AnimatePresence } from "framer-motion";
 import { signOut } from "next-auth/react";
-import { TbHistory, TbMenu2, TbSearch, TbX } from "react-icons/tb";
+import { TbHistory, TbKey, TbMenu2, TbSearch, TbWebhook, TbX } from "react-icons/tb";
 import type { Session } from "next-auth";
 import HistoryDrawer from "@/components/HistoryDrawer";
 import KeyboardShortcutsModal from "@/components/KeyboardShortcutsModal";
+import SectionNavLink from "@/components/SectionNavLink";
 import SmartSearch from "@/components/SmartSearch";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useFileUploadContext } from "@/contexts/FileUploadContext";
@@ -33,8 +33,6 @@ function getInitials(name?: string | null, email?: string | null): string {
 }
 
 export default function NavBar({ session }: NavBarProps) {
-  const router = useRouter();
-  const pathname = usePathname();
   const { reconvertFromHistory } = useFileUploadContext();
   const user = session?.user ?? null;
   const [historyOpen, setHistoryOpen] = useState(false);
@@ -90,23 +88,6 @@ export default function NavBar({ session }: NavBarProps) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleConvertClick = () => {
-    setMobileNavOpen(false);
-
-    if (pathname === "/") {
-      document.getElementById("file-cards")?.scrollIntoView({
-        behavior: "smooth",
-      });
-    } else {
-      router.push("/");
-      setTimeout(() => {
-        document.getElementById("file-cards")?.scrollIntoView({
-          behavior: "smooth",
-        });
-      }, 300);
-    }
-  };
-
   useEffect(() => {
     if (!mobileNavOpen) return;
 
@@ -151,26 +132,15 @@ export default function NavBar({ session }: NavBarProps) {
             aria-label="Sayfa bölümleri"
             className="hidden items-center justify-center gap-1 lg:flex"
           >
-            {SECTION_LINKS.map((link) =>
-              link.href === "#file-cards" ? (
-                <button
-                  key={link.href}
-                  type="button"
-                  onClick={handleConvertClick}
-                  className="rounded-lg px-3 py-2 text-sm text-gray-500 transition-colors hover:bg-[#d0f0f2]/60 hover:text-[#1D3461]"
-                >
-                  {link.label}
-                </button>
-              ) : (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className="rounded-lg px-3 py-2 text-sm text-gray-500 transition-colors hover:bg-[#d0f0f2]/60 hover:text-[#1D3461]"
-                >
-                  {link.label}
-                </Link>
-              ),
-            )}
+            {SECTION_LINKS.map((link) => (
+              <SectionNavLink
+                key={link.href}
+                href={link.href}
+                className="rounded-lg px-3 py-2 text-sm text-gray-500 transition-colors hover:bg-[#d0f0f2]/60 hover:text-[#1D3461]"
+              >
+                {link.label}
+              </SectionNavLink>
+            ))}
             <Link
               href={
                 user
@@ -256,6 +226,22 @@ export default function NavBar({ session }: NavBarProps) {
                     >
                       Geçmişim
                     </button>
+                    <Link
+                      href="/dashboard/how-use"
+                      onClick={() => setUserMenuOpen(false)}
+                      className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                    >
+                      <TbKey className="text-sm" />
+                      API Anahtarları
+                    </Link>
+                    <Link
+                      href="/dashboard/webhooks"
+                      onClick={() => setUserMenuOpen(false)}
+                      className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                    >
+                      <TbWebhook className="text-sm" />
+                      Webhook
+                    </Link>
                     <button
                       type="button"
                       onClick={() => signOut({ callbackUrl: "/" })}
@@ -300,27 +286,16 @@ export default function NavBar({ session }: NavBarProps) {
         {mobileNavOpen ? (
           <div className="border-t border-gray-100 bg-white px-4 py-4 lg:hidden">
             <nav aria-label="Mobil sayfa bölümleri" className="space-y-1">
-              {SECTION_LINKS.map((link) =>
-                link.href === "#file-cards" ? (
-                  <button
-                    key={link.href}
-                    type="button"
-                    onClick={handleConvertClick}
-                    className="block w-full rounded-lg px-3 py-2.5 text-left text-sm text-gray-600 transition-colors hover:bg-[#d0f0f2]/60 hover:text-[#1D3461]"
-                  >
-                    {link.label}
-                  </button>
-                ) : (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    onClick={() => setMobileNavOpen(false)}
-                    className="block rounded-lg px-3 py-2.5 text-sm text-gray-600 transition-colors hover:bg-[#d0f0f2]/60 hover:text-[#1D3461]"
-                  >
-                    {link.label}
-                  </Link>
-                ),
-              )}
+              {SECTION_LINKS.map((link) => (
+                <SectionNavLink
+                  key={link.href}
+                  href={link.href}
+                  onNavigate={() => setMobileNavOpen(false)}
+                  className="block w-full rounded-lg px-3 py-2.5 text-left text-sm text-gray-600 transition-colors hover:bg-[#d0f0f2]/60 hover:text-[#1D3461]"
+                >
+                  {link.label}
+                </SectionNavLink>
+              ))}
               <Link
                 href={
                   user

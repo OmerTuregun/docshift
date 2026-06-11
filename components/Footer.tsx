@@ -7,6 +7,7 @@ import {
   TbBrandTwitter,
   TbMail,
 } from "react-icons/tb";
+import SectionNavLink from "@/components/SectionNavLink";
 import { HOW_USE_LINK, HOW_USE_PATH, SECTION_LINKS } from "@/lib/siteNav";
 
 const PRODUCT_LINKS = [
@@ -80,12 +81,12 @@ export default function Footer() {
             <ul className="space-y-2.5">
               {PRODUCT_LINKS.map((link) => (
                 <li key={link.label}>
-                  <Link
+                  <SectionNavLink
                     href={link.href}
                     className="text-xs text-gray-400 transition-colors duration-150 hover:text-[#1A9BA1]"
                   >
                     {link.label}
-                  </Link>
+                  </SectionNavLink>
                 </li>
               ))}
             </ul>

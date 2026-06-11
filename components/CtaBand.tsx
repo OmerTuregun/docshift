@@ -1,7 +1,8 @@
 "use client";
 
 import { useRef } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { navigateToSection } from "@/lib/scrollToSection";
 import { motion, useInView } from "framer-motion";
 import { useSession } from "next-auth/react";
 import {
@@ -24,6 +25,7 @@ export default function CtaBand() {
   const ref = useRef<HTMLElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-60px" });
   const router = useRouter();
+  const pathname = usePathname();
   const { data: session } = useSession();
 
   return (
@@ -51,11 +53,7 @@ export default function CtaBand() {
         <div className="flex flex-col justify-center gap-3 sm:flex-row">
           <button
             type="button"
-            onClick={() => {
-              document.getElementById("file-cards")?.scrollIntoView({
-                behavior: "smooth",
-              });
-            }}
+            onClick={() => navigateToSection("#file-cards", pathname, router)}
             className="flex items-center justify-center gap-2 rounded-xl bg-[#1A9BA1] px-6 py-3 text-sm font-medium text-white transition-colors duration-200 hover:bg-[#4BBFC4]"
           >
             <TbUpload aria-hidden="true" />
