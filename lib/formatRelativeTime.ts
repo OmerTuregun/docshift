@@ -1,19 +1,32 @@
-export function formatRelativeTime(dateString: string): string {
-  const date = new Date(dateString);
-  const now = Date.now();
-  const diffMs = date.getTime() - now;
-  const rtf = new Intl.RelativeTimeFormat("tr", { numeric: "auto" });
+export function formatRelativeTime(dateStr: string): string {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const seconds = Math.floor(diff / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
+  const days = Math.floor(hours / 24);
 
-  const minutes = Math.round(diffMs / (1000 * 60));
-  if (Math.abs(minutes) < 60) {
-    return rtf.format(minutes, "minute");
+  if (seconds < 60) {
+    return "az önce";
   }
 
-  const hours = Math.round(diffMs / (1000 * 60 * 60));
-  if (Math.abs(hours) < 24) {
-    return rtf.format(hours, "hour");
+  if (minutes < 60) {
+    return `${minutes} dk önce`;
   }
 
-  const days = Math.round(diffMs / (1000 * 60 * 60 * 24));
-  return rtf.format(days, "day");
+  if (hours < 24) {
+    return `${hours} saat önce`;
+  }
+
+  if (days === 1) {
+    return "dün";
+  }
+
+  if (days < 7) {
+    return `${days} gün önce`;
+  }
+
+  return new Intl.DateTimeFormat("tr-TR", {
+    day: "numeric",
+    month: "short",
+  }).format(new Date(dateStr));
 }
