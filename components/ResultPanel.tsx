@@ -3,6 +3,9 @@
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { FiCopy, FiDownload, FiX } from "react-icons/fi";
+import JsonTreeRoot from "@/components/JsonTreeRoot";
+import MarkdownPreview from "@/components/MarkdownPreview";
+import PreviewToggle from "@/components/PreviewToggle";
 import type { OutputFormat } from "@/lib/converters";
 
 const EXTENSION_BY_FORMAT: Record<OutputFormat, string> = {
@@ -37,6 +40,7 @@ export default function ResultPanel({
   onToast,
 }: ResultPanelProps) {
   const [isCopying, setIsCopying] = useState(false);
+  const [previewMode, setPreviewMode] = useState<"raw" | "preview">("raw");
 
   const handleCopy = async () => {
     if (!data) return;
@@ -97,7 +101,13 @@ export default function ResultPanel({
                 </span>
               </div>
 
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-2">
+                <PreviewToggle
+                  mode={previewMode}
+                  onChange={setPreviewMode}
+                  format={data.format}
+                />
+
                 <button
                   type="button"
                   onClick={handleCopy}
@@ -125,9 +135,18 @@ export default function ResultPanel({
               </div>
             </div>
 
-            <pre className="max-h-[55vh] overflow-auto bg-[#0f172a] p-5 font-mono text-sm text-emerald-400 [scrollbar-color:rgba(255,255,255,0.2)_transparent] [scrollbar-width:thin]">
-              <code>{data.result}</code>
-            </pre>
+            <div className="max-h-[55vh] overflow-auto bg-[#0f172a] p-5 [scrollbar-color:rgba(255,255,255,0.2)_transparent] [scrollbar-width:thin]">
+              {previewMode === "raw" ||
+              (data.format !== "json" && data.format !== "markdown") ? (
+                <pre className="font-mono text-sm whitespace-pre-wrap text-emerald-400">
+                  <code>{data.result}</code>
+                </pre>
+              ) : data.format === "json" ? (
+                <JsonTreeRoot content={data.result} />
+              ) : (
+                <MarkdownPreview content={data.result} />
+              )}
+            </div>
 
             {isCopying ? (
               <p className="sr-only">Copied to clipboard</p>

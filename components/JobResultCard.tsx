@@ -13,6 +13,9 @@ import {
   TbRefresh,
   TbX,
 } from "react-icons/tb";
+import JsonTreeRoot from "@/components/JsonTreeRoot";
+import MarkdownPreview from "@/components/MarkdownPreview";
+import PreviewToggle from "@/components/PreviewToggle";
 import { showToast } from "@/components/Toast";
 import { FILE_SIZE_LIMIT_MB } from "@/lib/constants";
 import type { OutputFormat } from "@/lib/converters";
@@ -78,6 +81,7 @@ export default function JobResultCard({
   onRetry,
 }: JobResultCardProps) {
   const [showError, setShowError] = useState(false);
+  const [previewMode, setPreviewMode] = useState<"raw" | "preview">("raw");
 
   const handleCopy = async () => {
     if (!job.result) return;
@@ -189,6 +193,14 @@ export default function JobResultCard({
             </div>
           ) : null}
 
+          {job.status === "success" && job.result ? (
+            <PreviewToggle
+              mode={previewMode}
+              onChange={setPreviewMode}
+              format={job.outputFormat}
+            />
+          ) : null}
+
           <span className="rounded-md bg-white/10 px-2 py-0.5 text-xs text-white/70">
             {FORMAT_LABELS[job.outputFormat]}
           </span>
@@ -220,6 +232,25 @@ export default function JobResultCard({
         <div className="mt-2 flex items-center gap-1 text-[10px] text-white/30">
           <TbLink className="text-[10px]" aria-hidden="true" />
           {job.chainedFrom} → {job.outputFormat}
+        </div>
+      ) : null}
+
+      {job.status === "success" && job.result ? (
+        <div className="mt-2 rounded-lg bg-black/20">
+          {previewMode === "raw" ||
+          (job.outputFormat !== "json" && job.outputFormat !== "markdown") ? (
+            <pre className="max-h-64 overflow-auto p-3 font-mono text-xs leading-relaxed whitespace-pre-wrap text-emerald-400">
+              {job.result}
+            </pre>
+          ) : job.outputFormat === "json" ? (
+            <div className="max-h-64 overflow-auto p-3">
+              <JsonTreeRoot content={job.result} />
+            </div>
+          ) : (
+            <div className="max-h-64 overflow-auto p-3">
+              <MarkdownPreview content={job.result} />
+            </div>
+          )}
         </div>
       ) : null}
 
