@@ -7,14 +7,12 @@ import type { UploadJob } from "@/types";
 interface JobResultListProps {
   jobs: UploadJob[];
   clearJobs: () => void;
-  onToast: (message: string) => void;
   chainConvert: (job: UploadJob, toFormat: OutputFormat) => Promise<void>;
 }
 
 export default function JobResultList({
   jobs,
   clearJobs,
-  onToast,
   chainConvert,
 }: JobResultListProps) {
   if (jobs.length === 0) return null;
@@ -37,7 +35,6 @@ export default function JobResultList({
           <JobResultCard
             key={job.id}
             job={job}
-            onToast={onToast}
             onChain={(toFormat) => void chainConvert(job, toFormat)}
           />
         ))}

@@ -6,10 +6,13 @@ import {
   TbCheck,
   TbCopy,
   TbDownload,
+  TbFileOff,
   TbLink,
   TbLoader2,
   TbX,
 } from "react-icons/tb";
+import { showToast } from "@/components/Toast";
+import { FILE_SIZE_LIMIT_MB } from "@/lib/constants";
 import type { OutputFormat } from "@/lib/converters";
 import type { FileType, UploadJob } from "@/types";
 
@@ -45,13 +48,21 @@ const CHAIN_BUTTON_LABELS: Record<OutputFormat, string> = {
 
 interface JobResultCardProps {
   job: UploadJob;
-  onToast: (message: string) => void;
   onChain: (toFormat: OutputFormat) => void;
+}
+
+function isFileTooLargeError(error?: string): boolean {
+  if (!error) return false;
+
+  return (
+    error.includes("FILE_TOO_LARGE") ||
+    error.includes("limitini aşıyor") ||
+    error.includes("Dosya boyutu")
+  );
 }
 
 export default function JobResultCard({
   job,
-  onToast,
   onChain,
 }: JobResultCardProps) {
   const [showError, setShowError] = useState(false);
@@ -61,9 +72,9 @@ export default function JobResultCard({
 
     try {
       await navigator.clipboard.writeText(job.result);
-      onToast("Copied!");
+      showToast("Copied!", "success");
     } catch {
-      onToast("Copy failed");
+      showToast("Copy failed", "error");
     }
   };
 
@@ -122,8 +133,22 @@ export default function JobResultCard({
                 <TbX size={16} />
               </button>
               {showError && job.error ? (
-                <div className="absolute right-0 bottom-full z-50 mb-2 w-48 rounded-lg bg-red-900/90 px-3 py-2 text-xs text-white shadow-lg">
-                  {job.error}
+                <div className="absolute right-0 bottom-full z-50 mb-2 w-52 rounded-lg bg-red-900/90 px-3 py-2 text-xs text-white shadow-lg">
+                  {isFileTooLargeError(job.error) ? (
+                    <div className="flex items-center gap-2 text-red-400">
+                      <TbFileOff className="shrink-0 text-base" />
+                      <div>
+                        <div className="text-xs font-medium text-white">
+                          Dosya çok büyük
+                        </div>
+                        <div className="mt-0.5 text-[10px] text-red-200/80">
+                          Maks. {FILE_SIZE_LIMIT_MB}MB yükleyebilirsiniz
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    job.error
+                  )}
                 </div>
               ) : null}
             </div>

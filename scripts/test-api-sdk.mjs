@@ -40,5 +40,11 @@ try {
   if (error.code) {
     console.error("code:", error.code, "status:", error.status);
   }
+  if (error.code === "INVALID_RESPONSE") {
+    console.error(
+      "İpucu: Sunucu hazır mı? Önce şunu deneyin:",
+      "curl.exe -X POST http://localhost:3030/api/v1/convert",
+    );
+  }
   process.exit(1);
 }

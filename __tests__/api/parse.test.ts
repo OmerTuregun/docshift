@@ -1,6 +1,7 @@
 /** @jest-environment node */
 
 import { POST } from "@/app/api/parse/route";
+import { FILE_SIZE_ERROR, FILE_SIZE_LIMIT_BYTES } from "@/lib/constants";
 import {
   parseExcel,
   parsePdf,
@@ -114,6 +115,26 @@ describe("POST /api/parse", () => {
     expect(body).toEqual({
       success: false,
       error: "Missing or invalid fileType field",
+    });
+    expect(mockedParseExcel).not.toHaveBeenCalled();
+  });
+
+  it("returns 413 when file exceeds 10MB limit", async () => {
+    const largeContent = new Uint8Array(FILE_SIZE_LIMIT_BYTES + 1);
+    const file = new File([largeContent], "large.xlsx", {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+
+    const response = await POST(createParseRequest("excel", file));
+    const body = await response.json();
+
+    expect(response.status).toBe(413);
+    expect(body).toMatchObject({
+      success: false,
+      error: FILE_SIZE_ERROR,
+      code: "FILE_TOO_LARGE",
+      limit: FILE_SIZE_LIMIT_BYTES,
+      actual: FILE_SIZE_LIMIT_BYTES + 1,
     });
     expect(mockedParseExcel).not.toHaveBeenCalled();
   });

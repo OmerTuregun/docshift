@@ -1,4 +1,4 @@
-import { DocShiftError } from "./errors";
+import { DocShiftError } from "./errors.js";
 import type {
   ApiErrorBody,
   ApiSuccessBody,
@@ -6,15 +6,15 @@ import type {
   ConvertResult,
   DocShiftConfig,
   OutputFormat,
-} from "./types";
+} from "./types.js";
 
-export { DocShiftError } from "./errors";
+export { DocShiftError } from "./errors.js";
 export type {
   ConvertFileInput,
   ConvertResult,
   DocShiftConfig,
   OutputFormat,
-} from "./types";
+} from "./types.js";
 
 async function toUploadFile(
   input: ConvertFileInput["file"],
@@ -72,7 +72,18 @@ export class DocShift {
       body: formData,
     });
 
-    const body = (await response.json()) as ApiSuccessBody | ApiErrorBody;
+    const responseText = await response.text();
+    let body: ApiSuccessBody | ApiErrorBody;
+
+    try {
+      body = JSON.parse(responseText) as ApiSuccessBody | ApiErrorBody;
+    } catch {
+      throw new DocShiftError(
+        responseText.trim() || "API geçersiz yanıt döndürdü",
+        "INVALID_RESPONSE",
+        response.status,
+      );
+    }
 
     if (!response.ok || !body.success) {
       const errorBody = body as ApiErrorBody;

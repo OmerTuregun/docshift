@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { FILE_SIZE_ERROR, FILE_SIZE_LIMIT_BYTES } from "@/lib/constants";
 import { convert, isOutputFormat, type OutputFormat } from "@/lib/converters";
 import {
   getApiKeyUsageCountLastHour,
@@ -12,7 +13,6 @@ import { parseUploadedFile } from "@/lib/parseUploadedFile";
 
 export const runtime = "nodejs";
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024;
 const RATE_LIMIT_PER_HOUR = 100;
 
 function errorResponse(
@@ -70,7 +70,7 @@ export async function POST(request: Request) {
 
     const outputFormat = outputFormatField as OutputFormat;
 
-    if (file.size > MAX_FILE_SIZE) {
+    if (file.size > FILE_SIZE_LIMIT_BYTES) {
       await logApiKeyUsage(
         keyId,
         "/api/v1/convert",
@@ -78,11 +78,7 @@ export async function POST(request: Request) {
         outputFormat,
         413,
       );
-      return errorResponse(
-        "Dosya 10MB limitini aşıyor",
-        "FILE_TOO_LARGE",
-        413,
-      );
+      return errorResponse(FILE_SIZE_ERROR, "FILE_TOO_LARGE", 413);
     }
 
     const fileType = detectFileType(file.name);

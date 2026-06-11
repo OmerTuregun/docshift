@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import {
+  TbCheck,
   TbCopy,
   TbKey,
   TbPlus,
@@ -33,6 +34,8 @@ export default function ApiKeysClient({
   const [keys, setKeys] = useState<ApiKey[]>(initialKeys);
   const [newKeyName, setNewKeyName] = useState("");
   const [newlyCreatedKey, setNewlyCreatedKey] = useState<string | null>(null);
+  const [keyCopied, setKeyCopied] = useState(false);
+  const [keySavedConfirmed, setKeySavedConfirmed] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -59,6 +62,8 @@ export default function ApiKeysClient({
       }
 
       setNewlyCreatedKey(data.key);
+      setKeyCopied(false);
+      setKeySavedConfirmed(false);
       setNewKeyName("");
 
       const refresh = await fetch("/api/keys");
@@ -86,6 +91,21 @@ export default function ApiKeysClient({
 
     const data = await parseJsonResponse<{ error?: string }>(response);
     setError(data?.error ?? "API key silinemedi");
+  };
+
+  const handleCopyKey = async () => {
+    if (!newlyCreatedKey) return;
+
+    await navigator.clipboard.writeText(newlyCreatedKey);
+    setKeyCopied(true);
+  };
+
+  const handleDismissNewKey = () => {
+    if (!keySavedConfirmed) return;
+
+    setNewlyCreatedKey(null);
+    setKeyCopied(false);
+    setKeySavedConfirmed(false);
   };
 
   return (
@@ -126,31 +146,49 @@ export default function ApiKeysClient({
       </div>
 
       {newlyCreatedKey ? (
-        <div className="mb-6 rounded-2xl border border-[#1A9BA1]/30 bg-[#d0f0f2] p-5">
+        <div className="mb-6 rounded-2xl border-2 border-amber-300/60 bg-amber-50/80 p-5">
           <div className="flex items-start gap-3">
-            <TbShieldCheck className="mt-0.5 text-lg text-[#1A9BA1]" />
+            <TbShieldCheck className="mt-0.5 shrink-0 text-xl text-amber-600" />
             <div className="flex-1">
-              <p className="mb-1 text-sm font-medium text-[#1D3461]">
-                API Key oluşturuldu — yalnızca bir kez gösterilir
+              <p className="mb-1 text-sm font-semibold text-[#1D3461]">
+                API Key oluşturuldu — şimdi kopyalayıp kaydedin
               </p>
-              <p className="mb-3 text-xs text-[#1D3461]/60">
-                Bu key&apos;i güvenli bir yere kaydedin. Tekrar gösterilmeyecek.
+              <p className="mb-3 text-sm leading-relaxed text-amber-900/80">
+                Güvenlik nedeniyle bu key yalnızca bir kez gösterilir. Sayfayı
+                kapattıktan veya bu kutuyu kapattıktan sonra{" "}
+                <strong>aynı key&apos;i tekrar göremezsiniz.</strong> Lütfen
+                şimdi kopyalayıp güvenli bir yere kaydedin (ör. parola
+                yöneticisi, <code className="text-xs">.env</code> dosyası).
               </p>
-              <div className="flex items-center gap-2 rounded-xl border border-[#1A9BA1]/20 bg-white px-4 py-2.5">
+
+              <div className="mb-3 flex items-center gap-2 rounded-xl border border-amber-200 bg-white px-4 py-2.5">
                 <code className="flex-1 break-all font-mono text-sm text-[#1D3461]">
                   {newlyCreatedKey}
                 </code>
                 <button
                   type="button"
-                  onClick={() => void navigator.clipboard.writeText(newlyCreatedKey)}
-                  className="shrink-0 p-1 text-[#1A9BA1] hover:text-[#1D3461]"
-                  aria-label="Kopyala"
+                  onClick={() => void handleCopyKey()}
+                  className="flex shrink-0 items-center gap-1.5 rounded-lg bg-[#1A9BA1] px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-[#1D3461]"
                 >
-                  <TbCopy className="text-base" />
+                  {keyCopied ? <TbCheck /> : <TbCopy />}
+                  {keyCopied ? "Kopyalandı" : "Key'i kopyala"}
                 </button>
               </div>
 
-              <div className="mt-4 space-y-3">
+              <label className="mb-4 flex cursor-pointer items-start gap-2.5 rounded-xl border border-amber-200/80 bg-white/70 px-3 py-3">
+                <input
+                  type="checkbox"
+                  checked={keySavedConfirmed}
+                  onChange={(event) => setKeySavedConfirmed(event.target.checked)}
+                  className="mt-0.5 h-4 w-4 rounded border-gray-300 text-[#1A9BA1] focus:ring-[#1A9BA1]"
+                />
+                <span className="text-xs leading-relaxed text-[#1D3461]">
+                  Bu API key&apos;i kopyalayıp güvenli bir yere kaydettim. Tekrar
+                  gösterilmeyeceğini anlıyorum.
+                </span>
+              </label>
+
+              <div className="space-y-3 border-t border-amber-200/60 pt-4">
                 <p className="text-xs font-medium text-[#1D3461]">Hızlı başlangıç</p>
                 <pre className="overflow-x-auto rounded-xl bg-[#0f172a] p-3 font-mono text-xs text-emerald-400">
                   {`curl -X POST ${typeof window !== "undefined" ? window.location.origin : ""}/api/v1/convert \\
@@ -178,12 +216,29 @@ await client.convert({ file: "./document.xlsx", outputFormat: "json" });`}
                   </button>
                 ) : null}
               </div>
+
+              <div className="mt-4 flex justify-end">
+                <button
+                  type="button"
+                  onClick={handleDismissNewKey}
+                  disabled={!keySavedConfirmed}
+                  className="rounded-xl bg-[#1D3461] px-4 py-2 text-xs font-medium text-white transition-colors hover:bg-[#1A9BA1] disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  Kaydettim, kapatabilirsin
+                </button>
+              </div>
             </div>
             <button
               type="button"
-              onClick={() => setNewlyCreatedKey(null)}
-              className="p-1 text-gray-400 hover:text-gray-600"
+              onClick={handleDismissNewKey}
+              disabled={!keySavedConfirmed}
+              className="shrink-0 p-1 text-gray-400 hover:text-gray-600 disabled:cursor-not-allowed disabled:opacity-30"
               aria-label="Kapat"
+              title={
+                keySavedConfirmed
+                  ? "Kapat"
+                  : "Kapatmak için önce key'i kaydettiğinizi onaylayın"
+              }
             >
               <TbX className="text-sm" />
             </button>

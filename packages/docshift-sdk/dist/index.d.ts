@@ -1,6 +1,6 @@
-import type { ConvertFileInput, ConvertResult, DocShiftConfig, OutputFormat } from "./types";
-export { DocShiftError } from "./errors";
-export type { ConvertFileInput, ConvertResult, DocShiftConfig, OutputFormat, } from "./types";
+import type { ConvertFileInput, ConvertResult, DocShiftConfig, OutputFormat } from "./types.js";
+export { DocShiftError } from "./errors.js";
+export type { ConvertFileInput, ConvertResult, DocShiftConfig, OutputFormat, } from "./types.js";
 export declare class DocShift {
     private readonly apiKey;
     private readonly baseUrl;

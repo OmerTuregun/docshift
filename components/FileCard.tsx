@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { TbUpload } from "react-icons/tb";
 import OutputFormatSelector from "@/components/OutputFormatSelector";
 import { useIsMobile } from "@/hooks/useIsMobile";
+import { FILE_SIZE_LIMIT_BYTES, FILE_SIZE_LIMIT_MB } from "@/lib/constants";
 import type { OutputFormat } from "@/lib/converters";
 import type { FileType } from "@/types";
 
@@ -43,9 +44,12 @@ function FrontFace({
       <h2 className="text-sm font-medium text-white sm:text-base">{title}</h2>
       <p className="mt-1 text-xs text-white/50">{subtitle}</p>
 
-      <div className="mt-3 flex items-center gap-1.5 rounded-lg border border-dashed border-white/30 px-3 py-1.5 text-xs text-white/70 transition-all duration-200 group-hover:border-white/60 group-hover:text-white/90">
-        <TbUpload className="text-xs" />
-        Dosya yükle
+      <div className="mt-3 flex flex-col items-center gap-1 rounded-lg border border-dashed border-white/30 px-3 py-1.5 text-xs text-white/70 transition-all duration-200 group-hover:border-white/60 group-hover:text-white/90">
+        <div className="flex items-center gap-1.5">
+          <TbUpload className="text-xs" />
+          Dosya yükle
+        </div>
+        <span className="text-[10px] text-white/30">Maks. {FILE_SIZE_LIMIT_MB}MB</span>
       </div>
 
       <div className="absolute right-3 bottom-3 flex h-6 w-6 items-center justify-center rounded-full bg-white/15">
@@ -67,6 +71,7 @@ export default function FileCard({
   const isMobile = useIsMobile();
   const [isFlipped, setIsFlipped] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [isDragOverTooLarge, setIsDragOverTooLarge] = useState(false);
   const [outputFormat, setOutputFormat] = useState<OutputFormat>("json");
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -85,6 +90,7 @@ export default function FileCard({
     event.preventDefault();
     event.stopPropagation();
     setIsDragOver(false);
+    setIsDragOverTooLarge(false);
     const files = Array.from(event.dataTransfer.files);
     handleFiles(files);
   };
@@ -93,12 +99,21 @@ export default function FileCard({
     event.preventDefault();
     event.stopPropagation();
     setIsDragOver(true);
+
+    const fileSize = event.dataTransfer.items[0]?.getAsFile()?.size;
+
+    if (fileSize !== undefined && fileSize > FILE_SIZE_LIMIT_BYTES) {
+      setIsDragOverTooLarge(true);
+    } else {
+      setIsDragOverTooLarge(false);
+    }
   };
 
   const handleDragLeave = (event: React.DragEvent) => {
     event.preventDefault();
     event.stopPropagation();
     setIsDragOver(false);
+    setIsDragOverTooLarge(false);
   };
 
   const handleDropzoneClick = () => {
@@ -169,6 +184,7 @@ export default function FileCard({
       onMouseLeave={() => {
         setIsFlipped(false);
         setIsDragOver(false);
+        setIsDragOverTooLarge(false);
       }}
     >
       <div
@@ -222,14 +238,27 @@ export default function FileCard({
                 onDrop={handleDrop}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
-                className="flex min-h-[88px] flex-1 cursor-pointer flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed border-white/40 px-3 py-3 text-center text-xs leading-snug text-white/60 transition hover:border-white/80 hover:bg-white/10"
+                className="relative flex min-h-[88px] flex-1 cursor-pointer flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed border-white/40 px-3 py-3 text-center text-xs leading-snug text-white/60 transition hover:border-white/80 hover:bg-white/10"
               >
-                <TbUpload className="text-base text-white/50" />
-                <span>
-                  Dosyayı buraya sürükle
-                  <br />
-                  veya tıkla
-                </span>
+                {isDragOverTooLarge ? (
+                  <div className="absolute inset-0 flex items-center justify-center rounded-xl border-2 border-red-400/60 bg-red-500/20">
+                    <span className="text-xs font-medium text-white">
+                      Dosya çok büyük
+                    </span>
+                  </div>
+                ) : (
+                  <>
+                    <TbUpload className="text-base text-white/50" />
+                    <span>
+                      Dosyayı buraya sürükle
+                      <br />
+                      veya tıkla
+                    </span>
+                    <span className="text-[10px] text-white/30">
+                      Maks. {FILE_SIZE_LIMIT_MB}MB
+                    </span>
+                  </>
+                )}
               </button>
             </div>
 

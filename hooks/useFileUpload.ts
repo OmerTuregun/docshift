@@ -7,6 +7,8 @@ import { saveAnonConversion } from "@/lib/anonHistory";
 import type { OutputFormat } from "@/lib/converters";
 import { dispatchHistoryUpdated } from "@/lib/historyEvents";
 import { incrementSessionCount } from "@/lib/sessionCount";
+import { validateFile } from "@/lib/validateFile";
+import { showToast } from "@/components/Toast";
 import type { FileType, UploadJob } from "@/types";
 
 export function useFileUpload() {
@@ -68,7 +70,28 @@ export function useFileUpload() {
 
   const addFiles = useCallback(
     (files: File[], fileType: FileType, format: OutputFormat) => {
-      const newJobs: UploadJob[] = files.map((file) => ({
+      const validFiles: File[] = [];
+      const errors: string[] = [];
+
+      for (const file of files) {
+        const result = validateFile(file, fileType);
+
+        if (result.valid) {
+          validFiles.push(file);
+        } else {
+          errors.push(result.error);
+        }
+      }
+
+      for (const error of errors) {
+        showToast(error, "error", 5000);
+      }
+
+      if (validFiles.length === 0) {
+        return;
+      }
+
+      const newJobs: UploadJob[] = validFiles.map((file) => ({
         id: nanoid(),
         file,
         fileType,

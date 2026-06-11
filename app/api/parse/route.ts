@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
+import { FILE_SIZE_ERROR, FILE_SIZE_LIMIT_BYTES } from "@/lib/constants";
 import { convert, isOutputFormat, type OutputFormat } from "@/lib/converters";
 import { saveConversion } from "@/lib/db/history";
 import { incrementConversionCount } from "@/lib/db/stats";
@@ -44,6 +45,19 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { success: false, error: "Missing or invalid file field" },
         { status: 500 },
+      );
+    }
+
+    if (file.size > FILE_SIZE_LIMIT_BYTES) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: FILE_SIZE_ERROR,
+          code: "FILE_TOO_LARGE",
+          limit: FILE_SIZE_LIMIT_BYTES,
+          actual: file.size,
+        },
+        { status: 413 },
       );
     }
 

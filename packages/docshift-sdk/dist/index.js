@@ -1,5 +1,5 @@
-import { DocShiftError } from "./errors";
-export { DocShiftError } from "./errors";
+import { DocShiftError } from "./errors.js";
+export { DocShiftError } from "./errors.js";
 async function toUploadFile(input, fileName) {
     if (typeof input === "string") {
         const { readFile } = await import("node:fs/promises");
@@ -35,7 +35,14 @@ export class DocShift {
             },
             body: formData,
         });
-        const body = (await response.json());
+        const responseText = await response.text();
+        let body;
+        try {
+            body = JSON.parse(responseText);
+        }
+        catch {
+            throw new DocShiftError(responseText.trim() || "API geçersiz yanıt döndürdü", "INVALID_RESPONSE", response.status);
+        }
         if (!response.ok || !body.success) {
             const errorBody = body;
             throw new DocShiftError(errorBody.error ?? "Dönüşüm başarısız", errorBody.code ?? "UNKNOWN", response.status);
