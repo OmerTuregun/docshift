@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -133,7 +135,22 @@ export default function Footer() {
             © {new Date().getFullYear()} DocShift. Tüm hakları saklıdır.
           </p>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => {
+                document.dispatchEvent(
+                  new KeyboardEvent("keydown", { key: "?", bubbles: true }),
+                );
+              }}
+              className="hidden items-center gap-1.5 text-[10px] text-gray-300 transition-colors hover:text-[#1A9BA1] sm:flex"
+            >
+              <kbd className="rounded border border-gray-200 bg-gray-50 px-1.5 py-0.5 font-mono text-[9px]">
+                ?
+              </kbd>
+              Klavye kısayolları
+            </button>
+
             {TRUST_BADGES.map((badge) => (
               <span
                 key={badge}

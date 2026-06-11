@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -9,7 +9,9 @@ import { signOut } from "next-auth/react";
 import { TbHistory, TbMenu2, TbSearch, TbX } from "react-icons/tb";
 import type { Session } from "next-auth";
 import HistoryDrawer from "@/components/HistoryDrawer";
+import KeyboardShortcutsModal from "@/components/KeyboardShortcutsModal";
 import SmartSearch from "@/components/SmartSearch";
+import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useFileUploadContext } from "@/contexts/FileUploadContext";
 import { HOW_USE_LINK, HOW_USE_PATH, SECTION_LINKS } from "@/lib/siteNav";
 
@@ -39,7 +41,43 @@ export default function NavBar({ session }: NavBarProps) {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
+
+  const focusSearch = useCallback(() => {
+    document
+      .querySelector<HTMLInputElement>('input[placeholder="Ara..."]')
+      ?.focus();
+  }, []);
+
+  const shortcutHandlers = useMemo(
+    () => ({
+      search: focusSearch,
+      history: () => setHistoryOpen((open) => !open),
+      close: () => {
+        if (shortcutsOpen) {
+          setShortcutsOpen(false);
+        } else if (historyOpen) {
+          setHistoryOpen(false);
+        } else if (mobileSearchOpen) {
+          setMobileSearchOpen(false);
+        }
+      },
+      help: () => setShortcutsOpen((open) => !open),
+      "copy-last": () => {
+        window.dispatchEvent(new CustomEvent("shortcut:copy-last"));
+      },
+      "download-last": () => {
+        window.dispatchEvent(new CustomEvent("shortcut:download-last"));
+      },
+      "download-all": () => {
+        window.dispatchEvent(new CustomEvent("shortcut:download-all"));
+      },
+    }),
+    [focusSearch, historyOpen, mobileSearchOpen, shortcutsOpen],
+  );
+
+  useKeyboardShortcuts(shortcutHandlers);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -328,6 +366,11 @@ export default function NavBar({ session }: NavBarProps) {
           />
         ) : null}
       </AnimatePresence>
+
+      <KeyboardShortcutsModal
+        isOpen={shortcutsOpen}
+        onClose={() => setShortcutsOpen(false)}
+      />
     </>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { nanoid } from "nanoid";
 import { showToast } from "@/components/Toast";
@@ -8,7 +8,7 @@ import { saveAnonConversion } from "@/lib/anonHistory";
 import type { OutputFormat } from "@/lib/converters";
 import { dispatchHistoryUpdated } from "@/lib/historyEvents";
 import { incrementSessionCount } from "@/lib/sessionCount";
-import { downloadZip } from "@/lib/downloadZip";
+import { downloadZip, getFileExtension, sanitizeFileName } from "@/lib/downloadZip";
 import type { ConversionRecord } from "@/lib/db/history";
 import { validateFile } from "@/lib/validateFile";
 import type { FileType, UploadJob } from "@/types";
@@ -331,6 +331,53 @@ export function useFileUpload() {
 
   const hasMultipleSuccessful =
     jobs.filter((job) => job.status === "success").length >= 2;
+
+  useEffect(() => {
+    const copyHandler = () => {
+      const lastSuccess = [...jobs]
+        .reverse()
+        .find((job) => job.status === "success");
+
+      if (lastSuccess?.result) {
+        void navigator.clipboard.writeText(lastSuccess.result);
+        showToast("Kopyalandı", "success");
+      }
+    };
+
+    const downloadHandler = () => {
+      const lastSuccess = [...jobs]
+        .reverse()
+        .find((job) => job.status === "success");
+
+      if (!lastSuccess?.result) {
+        return;
+      }
+
+      const ext = getFileExtension(lastSuccess.outputFormat);
+      const blob = new Blob([lastSuccess.result], { type: "text/plain" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+
+      link.href = url;
+      link.download = sanitizeFileName(lastSuccess.file.name) + ext;
+      link.click();
+      URL.revokeObjectURL(url);
+    };
+
+    const downloadAllHandler = () => {
+      void downloadAllAsZip();
+    };
+
+    window.addEventListener("shortcut:copy-last", copyHandler);
+    window.addEventListener("shortcut:download-last", downloadHandler);
+    window.addEventListener("shortcut:download-all", downloadAllHandler);
+
+    return () => {
+      window.removeEventListener("shortcut:copy-last", copyHandler);
+      window.removeEventListener("shortcut:download-last", downloadHandler);
+      window.removeEventListener("shortcut:download-all", downloadAllHandler);
+    };
+  }, [downloadAllAsZip, jobs]);
 
   return {
     jobs,
